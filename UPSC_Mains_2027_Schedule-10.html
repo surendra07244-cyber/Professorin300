@@ -1,0 +1,1615 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mission 2027 — Professor's Command Ledger</title>
+<style>
+  :root{
+    --ink:#0f1a17; --paper:#f4efe4; --paper-dim:#e8e0cf; --brass:#b98a3d; --brass-dim:#8a6a30;
+    --moss:#3c5b48; --moss-dim:#2a4234; --red:#9c3b2c; --line:#d8cdb3; --ok:#3c5b48; --gold:#c9a227;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--ink);color:var(--paper);font-family:'Georgia','Times New Roman',serif;-webkit-font-smoothing:antialiased;}
+  .mono{font-family:'Courier New',monospace;letter-spacing:0.02em;}
+  header.top{padding:24px 20px 18px;border-bottom:1px solid #24352f;background:linear-gradient(180deg,#132420,#0f1a17);position:relative;}
+  .eyebrow{font-family:'Courier New',monospace;font-size:11px;letter-spacing:0.22em;text-transform:uppercase;color:var(--brass);margin-bottom:6px;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;}
+  .syncbadge{font-size:10px;padding:3px 8px;border:1px solid #3a4c44;color:#8fa79a;letter-spacing:0.05em;}
+  .syncbadge.ok{color:#8fd6a8;border-color:#2a4234;}
+  .syncbadge.local{color:var(--brass);border-color:var(--brass-dim);}
+  .syncbadge.saving{color:#e0c68a;}
+  h1{margin:0 0 4px;font-size:24px;font-weight:400;}
+  .greetrow{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:14px;}
+  .sub{color:#a9bdb2;font-size:13px;}
+  .profbtn{background:transparent;border:1px solid var(--brass-dim);color:var(--brass);font-family:'Courier New',monospace;font-size:11px;padding:5px 10px;cursor:pointer;}
+  .counters{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:1px;background:#24352f;border:1px solid #24352f;}
+  .counter{background:#132420;padding:11px 13px;}
+  .counter .num{font-family:'Courier New',monospace;font-size:20px;color:var(--paper);line-height:1;}
+  .counter .lbl{font-size:9.5px;letter-spacing:0.07em;text-transform:uppercase;color:#8fa79a;margin-top:5px;}
+  .counter.milestone .num{color:var(--brass);}
+  main{max-width:820px;margin:0 auto;padding:20px 16px 80px;}
+
+  nav.datebar{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:16px;background:#132420;border:1px solid #24352f;padding:10px 12px;}
+  nav.datebar button{background:var(--moss);color:var(--paper);border:none;padding:8px 12px;font-family:'Courier New',monospace;font-size:13px;cursor:pointer;}
+  nav.datebar button:hover{background:var(--moss-dim);}
+  nav.datebar .datepick{display:flex;flex-direction:column;align-items:center;flex:1;}
+  nav.datebar input[type=date]{background:transparent;border:none;color:var(--paper);font-family:'Courier New',monospace;font-size:14px;text-align:center;}
+  .todaybtn{background:transparent !important;border:1px solid var(--brass) !important;color:var(--brass) !important;}
+
+  .daycard{background:var(--paper);color:#231d12;border:1px solid var(--line);}
+  .daycard .dayhead{padding:16px 18px 12px;border-bottom:2px solid var(--ink);display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:6px;}
+  .daycard .dayhead h2{margin:0;font-size:20px;font-weight:400;}
+  .phasepill{font-family:'Courier New',monospace;font-size:10.5px;letter-spacing:0.08em;text-transform:uppercase;padding:4px 8px;border:1px solid var(--ink);}
+  .phasepill.bpsc{background:#e3d3ad;} .phasepill.mains{background:#d8e3d3;} .phasepill.rest{background:#e6d6d0;}
+  .phasepill.test{background:var(--red);color:var(--paper);border-color:var(--red);}
+
+  .progresswrap{padding:10px 18px;background:var(--paper-dim);display:flex;align-items:center;gap:10px;}
+  .progressbar{flex:1;height:6px;background:#cfc4a4;position:relative;overflow:hidden;}
+  .progressbar .fill{height:100%;background:var(--moss);transition:width .25s ease;}
+  .progresswrap .pct{font-family:'Courier New',monospace;font-size:12px;color:#4a4230;}
+
+  .appreciate{margin:0;padding:12px 18px;background:#e9dfb0;border-bottom:2px solid var(--gold);font-size:13.5px;color:#4a3a10;display:none;}
+  .appreciate.show{display:block;}
+
+  ul.blocks{list-style:none;margin:0;padding:0;}
+  ul.blocks li{display:flex;gap:10px;align-items:flex-start;padding:12px 18px;border-bottom:1px solid var(--line);}
+  ul.blocks li:last-child{border-bottom:none;}
+  ul.blocks li.done{background:#e9e2cc;}
+  ul.blocks li.done .desc{opacity:0.55;text-decoration:line-through;}
+  ul.blocks li input[type=checkbox]{margin-top:3px;width:18px;height:18px;accent-color:var(--moss);flex-shrink:0;cursor:pointer;}
+  ul.blocks li .time{font-family:'Courier New',monospace;font-size:12px;color:var(--brass-dim);width:92px;flex-shrink:0;padding-top:1px;}
+  ul.blocks li .desc b{font-weight:700;}
+  ul.blocks li .desc .tag{display:inline-block;font-family:'Courier New',monospace;font-size:9.5px;letter-spacing:0.06em;text-transform:uppercase;background:var(--ink);color:var(--paper);padding:1px 6px;margin-left:6px;vertical-align:middle;}
+  ul.blocks li .desc .tag.test{background:var(--red);}
+  .desc{font-size:14.5px;line-height:1.42;flex:1;}
+  .taskbtns{display:flex;gap:5px;flex-shrink:0;}
+  .taskbtns button{background:none;border:1px solid #bfb28c;color:#5a4f36;font-size:11px;padding:3px 6px;cursor:pointer;font-family:'Courier New',monospace;}
+  .addtaskrow{padding:12px 18px;}
+  .addtaskrow button{width:100%;background:var(--paper-dim);border:1px dashed #bfb28c;color:#4a4230;padding:9px;font-family:'Courier New',monospace;font-size:12px;cursor:pointer;}
+  .quickrow{display:flex;gap:8px;padding:10px 18px;background:var(--paper-dim);border-bottom:1px solid var(--line);}
+  .quickrow button{flex:1;background:transparent;border:1px solid #8a7f5f;color:#4a4230;padding:8px;font-family:'Courier New',monospace;font-size:11.5px;cursor:pointer;}
+  .focustimer{padding:12px 18px;background:#e3d3ad;border-top:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;}
+  .focustimer .ftlabel{font-family:'Courier New',monospace;font-size:11px;color:#5a4230;text-transform:uppercase;letter-spacing:0.06em;}
+  .focustimer .ftdisplay{font-family:'Courier New',monospace;font-size:22px;color:#3a2c10;}
+  .focustimer button{background:var(--moss);color:var(--paper);border:none;padding:7px 12px;font-family:'Courier New',monospace;font-size:11px;cursor:pointer;}
+  .focustimer button.secondary{background:transparent;border:1px solid var(--brass-dim);color:var(--brass-dim);}
+
+  .reviewbox{padding:14px 18px;background:#efe8d4;border-top:2px solid var(--ink);}
+  .reviewbox h4{margin:0 0 8px;font-size:12px;text-transform:uppercase;letter-spacing:0.08em;font-family:'Courier New',monospace;color:#5a4f36;}
+  .stars{margin-bottom:8px;}
+  .stars span{cursor:pointer;font-size:20px;color:#bfb28c;}
+  .stars span.on{color:var(--gold);}
+  .reviewbox textarea{width:100%;min-height:64px;font-family:Georgia,serif;font-size:13.5px;padding:8px;border:1px solid #bfb28c;background:#faf6ea;resize:vertical;}
+  .reviewbox .rbtns{display:flex;justify-content:space-between;align-items:center;margin-top:6px;}
+  .reviewbox button{background:var(--moss);color:var(--paper);border:none;padding:7px 14px;font-family:'Courier New',monospace;font-size:12px;cursor:pointer;}
+  .rsaved{font-size:11px;color:#5a4f36;font-family:'Courier New',monospace;}
+
+  section.panel{margin-top:22px;border:1px solid #24352f;background:#132420;}
+  section.panel h3{margin:0;padding:12px 16px;font-size:12.5px;letter-spacing:0.1em;text-transform:uppercase;font-family:'Courier New',monospace;color:var(--brass);border-bottom:1px solid #24352f;display:flex;justify-content:space-between;align-items:center;}
+  section.panel h3 button{background:var(--moss);color:var(--paper);border:none;padding:5px 10px;font-family:'Courier New',monospace;font-size:10.5px;cursor:pointer;}
+  section.panel .inner{padding:14px 16px;font-size:13.5px;color:#c8d6cd;line-height:1.55;}
+  section.panel table{width:100%;border-collapse:collapse;font-size:12.5px;}
+  section.panel table th, section.panel table td{text-align:left;padding:6px 8px;border-bottom:1px solid #24352f;}
+  section.panel table th{color:var(--brass);font-family:'Courier New',monospace;font-weight:400;font-size:11px;text-transform:uppercase;}
+  .actions{display:flex;gap:8px;flex-wrap:wrap;padding:14px 16px;}
+  .actions button{background:var(--moss);color:var(--paper);border:1px solid var(--moss-dim);padding:9px 14px;font-family:'Courier New',monospace;font-size:12px;cursor:pointer;}
+  .actions button.secondary{background:transparent;border:1px solid var(--brass-dim);color:var(--brass);}
+  .actions button.danger{background:transparent;border:1px solid var(--red);color:#e08a78;}
+  .actions button:hover{opacity:0.85;}
+  #historyList{max-height:260px;overflow-y:auto;}
+  #historyList .hrow{display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #24352f;font-size:12.5px;}
+  #historyList .hrow .hp{color:var(--brass);font-family:'Courier New',monospace;}
+  .quote{font-style:italic;color:var(--paper);border-left:3px solid var(--brass);padding-left:12px;margin:0;font-size:14.5px;}
+  .loading{padding:20px;text-align:center;color:#8fa79a;font-family:'Courier New',monospace;font-size:12px;}
+  footer{text-align:center;padding:30px 16px 10px;color:#5a6e64;font-size:11px;font-family:'Courier New',monospace;}
+  .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(20px);background:#1c2e28;color:var(--paper);border:1px solid var(--gold);padding:11px 18px;font-size:13px;font-family:Georgia,serif;z-index:1200;opacity:0;transition:opacity .25s ease, transform .25s ease;max-width:88vw;text-align:center;pointer-events:none;}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+  .offlinebadge{font-size:10px;padding:3px 8px;border:1px solid var(--red);color:#e08a78;letter-spacing:0.05em;display:none;}
+  .offlinebadge.show{display:inline-block;}
+  .weekstrip{display:flex;gap:6px;padding:10px 18px;background:var(--paper-dim);border-bottom:1px solid var(--line);}
+  .weekstrip .wsdot{flex:1;text-align:center;cursor:pointer;padding:6px 2px;border:1px solid transparent;}
+  .weekstrip .wsdot .wsday{font-family:'Courier New',monospace;font-size:9.5px;color:#7a6f52;text-transform:uppercase;}
+  .weekstrip .wsdot .wsbar{height:5px;margin-top:4px;background:#cfc4a4;position:relative;overflow:hidden;}
+  .weekstrip .wsdot .wsbar .wsfill{height:100%;background:var(--moss);}
+  .weekstrip .wsdot.current{border-color:var(--brass);}
+  .navextra{display:flex;gap:6px;}
+  .navextra button{background:transparent;border:1px solid var(--brass-dim);color:var(--brass);font-family:'Courier New',monospace;font-size:11px;padding:6px 9px;cursor:pointer;}
+  tr.clickable{cursor:pointer;}
+  tr.clickable:hover{background:#1c2e28;}
+  body.focus-mode .hideable{display:none !important;}
+  .focusbtn{background:transparent;border:1px solid var(--brass-dim);color:var(--brass);font-family:'Courier New',monospace;font-size:11px;padding:5px 10px;cursor:pointer;margin-left:6px;}
+  .focusbtn.active{background:var(--gold);color:#231d12;border-color:var(--gold);}
+  input[type=file]{color:#c8d6cd;font-size:12px;}
+
+  .backlogday{margin-bottom:10px;border:1px solid #24352f;background:#0f1e19;}
+  .backlogday .bdhead{padding:7px 10px;font-family:'Courier New',monospace;font-size:11.5px;color:var(--brass);border-bottom:1px solid #24352f;display:flex;justify-content:space-between;}
+  .backlogday .bditem{display:flex;gap:8px;align-items:flex-start;padding:8px 10px;font-size:13px;border-bottom:1px solid #1c2e28;}
+  .backlogday .bditem:last-child{border-bottom:none;}
+  .backlogday .bditem input{margin-top:2px;accent-color:var(--moss);}
+
+  .analyticsgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:1px;background:#24352f;}
+  .analyticsgrid .ai{background:#0f1e19;padding:12px;}
+  .analyticsgrid .ai .n{font-family:'Courier New',monospace;font-size:19px;color:var(--gold);}
+  .analyticsgrid .ai .l{font-size:10px;color:#8fa79a;text-transform:uppercase;letter-spacing:0.05em;margin-top:4px;}
+
+  .badgewrap{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;}
+  .badge{background:#1c2e28;border:1px solid var(--gold);color:var(--gold);font-size:11.5px;padding:5px 9px;font-family:'Courier New',monospace;}
+
+  .healthrow{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid #24352f;font-size:12.5px;}
+
+  .overlay{position:fixed;inset:0;background:rgba(10,15,13,0.96);z-index:999;display:flex;align-items:center;justify-content:center;padding:20px;}
+  .overlay.hidden{display:none;}
+  .ocard{background:var(--paper);color:#231d12;max-width:380px;width:100%;padding:26px 24px;border:1px solid var(--brass);}
+  .ocard h2{margin:0 0 4px;font-size:20px;font-weight:400;}
+  .ocard p{color:#5a4f36;font-size:13px;margin:0 0 16px;}
+  .ocard label{display:block;font-family:'Courier New',monospace;font-size:11px;text-transform:uppercase;letter-spacing:0.06em;color:#5a4f36;margin:12px 0 5px;}
+  .ocard input[type=text],.ocard input[type=password]{width:100%;padding:9px 10px;border:1px solid #bfb28c;background:#faf6ea;font-family:Georgia,serif;font-size:14px;}
+  .ocard .oactions{display:flex;gap:8px;margin-top:18px;}
+  .ocard button{flex:1;background:var(--moss);color:var(--paper);border:none;padding:11px;font-family:'Courier New',monospace;font-size:12.5px;cursor:pointer;}
+  .ocard button.secondary{background:transparent;border:1px solid var(--brass-dim);color:var(--brass-dim);}
+  .oerr{color:var(--red);font-size:12px;margin-top:8px;display:none;}
+  .ocheck{display:flex;align-items:center;gap:6px;margin-top:10px;font-size:12.5px;color:#5a4f36;}
+</style>
+</head>
+<body>
+
+<div class="overlay" id="loginOverlay">
+  <div class="ocard" id="ocardBody"></div>
+</div>
+
+<header class="top">
+  <div class="eyebrow">
+    <span>UPSC Mains 2027 · Personal Command Ledger</span>
+    <span class="offlinebadge mono" id="offlineBadge">Offline</span>
+    <span class="syncbadge mono" id="syncBadge">Local only</span>
+  </div>
+  <div class="greetrow">
+    <div>
+      <h1 id="greetName">Welcome, Professor</h1>
+      <div class="sub">Target: All-India Rank under 300 · Optional — Philosophy</div>
+    </div>
+    <button class="profbtn" id="editProfileBtn">Profile</button>
+    <button class="focusbtn" id="focusModeBtn" title="Hide everything except today's checklist">🎯 Focus Mode</button>
+  </div>
+  <div class="counters" id="counters"></div>
+</header>
+
+<main>
+  <nav class="datebar">
+    <button id="prevDay" title="Previous day (←)">&larr; Prev</button>
+    <div class="datepick">
+      <input type="date" id="datePicker">
+      <button class="todaybtn" id="jumpToday" style="margin-top:4px;">Today</button>
+    </div>
+    <button id="nextDay" title="Next day (→)">Next &rarr;</button>
+  </nav>
+  <div style="display:flex;gap:8px;margin:-8px 0 16px;">
+    <button id="nextTestBtn" style="flex:1;background:var(--red);color:var(--paper);border:none;padding:9px;font-family:'Courier New',monospace;font-size:12px;cursor:pointer;">⏭ Jump to next test day</button>
+    <button id="searchToggleBtn" style="flex:1;background:transparent;border:1px solid var(--brass-dim);color:var(--brass);padding:9px;font-family:'Courier New',monospace;font-size:12px;cursor:pointer;">🔍 Search ledger</button>
+  </div>
+  <div id="searchBox" style="display:none;margin:-8px 0 16px;background:#132420;border:1px solid #24352f;padding:12px;">
+    <div style="display:flex;gap:8px;">
+      <input type="text" id="searchInput" placeholder="Search tasks & reviews…" style="flex:1;padding:8px;font-family:Georgia,serif;font-size:13px;background:#0f1e19;border:1px solid #24352f;color:var(--paper);">
+      <button id="searchGoBtn" style="background:var(--moss);color:var(--paper);border:none;padding:0 14px;font-family:'Courier New',monospace;font-size:12px;cursor:pointer;">Go</button>
+    </div>
+    <div id="searchResults" style="margin-top:10px;max-height:240px;overflow-y:auto;"></div>
+  </div>
+
+  <div class="weekstrip" id="weekStrip" style="display:none;"></div>
+  <div class="daycard" id="dayCard"><div class="loading">Loading day…</div></div>
+
+  <section class="panel hideable">
+    <h3>Professor's Note</h3>
+    <div class="inner" id="profNote"></div>
+  </section>
+
+  <section class="panel hideable">
+    <h3>Spaced Recall — Don't Let It Fade</h3>
+    <div class="inner" id="recallInner"></div>
+  </section>
+
+  <section class="panel hideable">
+    <h3>Backlog <button id="loadBacklog">Scan pending tasks</button></h3>
+    <div class="inner" id="backlogInner"><p style="margin:0;color:#8fa79a;">Tap "Scan pending tasks" to pull every unticked task from past days into one place.</p></div>
+  </section>
+
+  <section class="panel hideable">
+    <h3>Calendar Overview <button id="loadHeatmap">Load heatmap</button></h3>
+    <div class="inner" id="heatmapInner"><p style="margin:0;color:#8fa79a;">A colour-coded month view of every day's completion — green means fully done, red means barely touched. Tap any square to jump there.</p></div>
+  </section>
+
+  <section class="panel hideable">
+    <h3>Weekly AI Report <button id="genReport">Generate</button></h3>
+    <div class="inner" id="reportInner"><p style="margin:0;color:#8fa79a;">Generates a short performance summary and next-week recommendations from this week's ticks and reviews.</p></div>
+  </section>
+
+  <section class="panel hideable">
+    <h3>Appreciation &amp; Streaks <button id="refreshAch">Refresh</button></h3>
+    <div class="inner" id="achInner"><p style="margin:0;color:#8fa79a;">Tap Refresh to see your streak, badges, and all-time completion.</p></div>
+  </section>
+
+  <section class="panel hideable">
+    <h3>Progress Overview <button id="refreshAnalytics">Refresh</button></h3>
+    <div class="inner" id="analyticsInner"><div class="analyticsgrid" id="analyticsGrid"></div></div>
+  </section>
+
+  <section class="panel hideable">
+    <h3>Mains Test Series — Re-dated Calendar</h3>
+    <div class="inner">
+      <p style="margin-top:0;">First sitting lands <b>4–6 Aug 2026</b>, weekly rhythm thereafter. To land the full GS1–GS4 cycle inside 20 Nov 2026, a few sittings are <b>combined into the same week</b> rather than dropped — every listed test is still covered.</p>
+      <table id="testTable"></table>
+    </div>
+  </section>
+
+  <section class="panel hideable">
+    <h3>Optional Paper-2 (Philosophy) — Self Mock Days</h3>
+    <div class="inner">
+      <p style="margin-top:0;">Full Paper-2 syllabus done with PYQs by <b>10 Oct 2026</b>. Four self-administered mock days:</p>
+      <table id="optTable"></table>
+    </div>
+  </section>
+
+  <section class="panel hideable">
+    <h3>Milestones</h3>
+    <div class="inner"><p style="margin-top:0;">BPSC Mains — 24 Jul 2026 · RAS Prelims — date pending, not built here · UPPSC Prelims — 24 Dec 2026 (after this ledger's 20 Nov close; ask and I'll extend it).</p></div>
+  </section>
+
+  <section class="panel hideable">
+    <h3>Data Health <button id="checkHealth">Run check</button></h3>
+    <div class="inner" id="healthInner"><p style="margin:0;color:#8fa79a;">Checks every stored day for corrupted data and lets you repair it safely. Recommended once a month.</p></div>
+  </section>
+
+  <section class="panel hideable">
+    <h3>Backup &amp; History</h3>
+    <div class="actions">
+      <button id="exportBtn">⬇ Export backup (.json)</button>
+      <label class="secondary" style="border:1px solid var(--brass-dim);color:var(--brass);padding:9px 14px;font-family:'Courier New',monospace;font-size:12px;cursor:pointer;">
+        ⬆ Restore backup <input type="file" id="importFile" accept="application/json" style="display:none;">
+      </label>
+      <button id="historyBtn" class="secondary">View completion history</button>
+      <button id="copyTodayBtn" class="secondary">Copy today's plan</button>
+      <button id="cloudSyncBtn" class="secondary">☁ Sync to cloud now</button>
+      <button id="cloudRestoreBtn" class="secondary">☁ Restore from cloud</button>
+    </div>
+    <div class="inner" id="historyList" style="display:none;"></div>
+  </section>
+
+  <footer>Ledger state saves automatically after every tap — reopening this file keeps your ticks intact.</footer>
+</main>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script>
+/* ================= OPTIONAL FREE CLOUD BACKUP (Firebase) =================
+   Paste your own Firebase project's config below to turn this on.
+   Steps: console.firebase.google.com -> Create project -> Build ->
+   Firestore Database -> Create database (test mode) -> Project settings ->
+   Add a Web app -> copy the firebaseConfig object here.
+   Leave as-is (apiKey: "YOUR_API_KEY") to keep the app fully local-only —
+   everything still auto-saves and works without this. */
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyDWD7uF0UhSxculcsuHi_jm4eah18HXQVY",
+  authDomain: "schedule-2027.firebaseapp.com",
+  projectId: "schedule-2027",
+  storageBucket: "schedule-2027.firebasestorage.app",
+  messagingSenderId: "996049896887",
+  appId: "1:996049896887:web:8fb323bee7c629514a1432"
+};
+const FIREBASE_ENABLED = !!(FIREBASE_CONFIG.apiKey && FIREBASE_CONFIG.apiKey !== "YOUR_API_KEY");
+let fbDb = null;
+let fbAuth = null;
+if(FIREBASE_ENABLED){
+  try{
+    firebase.initializeApp(FIREBASE_CONFIG);
+    fbDb = firebase.firestore();
+    fbAuth = firebase.auth();
+  }catch(e){ console.error("Firebase init failed", e); }
+}
+
+/* ================= Date & schedule constants ================= */
+const D = (y,m,d)=>new Date(Date.UTC(y,m-1,d));
+const localMidnightUTC = ()=>{ const n=new Date(); return D(n.getFullYear(), n.getMonth()+1, n.getDate()); };
+const fmt = (dt)=>dt.toISOString().slice(0,10);
+const addDays = (dt,n)=>{const x=new Date(dt); x.setUTCDate(x.getUTCDate()+n); return x;};
+const dayName = (dt)=>['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][dt.getUTCDay()];
+const longDate = (dt)=>dt.toLocaleDateString('en-GB',{weekday:'long',day:'2-digit',month:'short',year:'numeric',timeZone:'UTC'});
+
+const SCHEDULE_START = D(2026,7,3);
+const BPSC_EXAM      = D(2026,7,24);
+const REST1          = D(2026,7,25);
+const REST2          = D(2026,7,26);
+const MAINS_START    = D(2026,7,27);
+const SCHEDULE_END   = D(2026,11,20);
+const UPPSC_PRELIMS  = D(2026,12,24);
+
+const GS4_WEEKS = [
+  {start:D(2026,7,27), label:"GS4 · Ethics & Human Interface / Attitude", points:["Essence, determinants & consequences of ethics in human actions","Dimensions of ethics; ethics in private & public relationships","Human values — lessons from great leaders, reformers, administrators","Role of family, society & educational institutions in inculcating values","Attitude — content, structure, function; influence on thought & behaviour"]},
+  {start:D(2026,8,3),  label:"GS4 · Aptitude, Foundational Values & EI", points:["Aptitude & foundational values for civil service — integrity, impartiality, objectivity","Dedication to public service, empathy, tolerance, compassion for weaker sections","Emotional intelligence — concepts, utility & application in administration","Contributions of moral thinkers & philosophers — India & world"]},
+  {start:D(2026,8,10), label:"GS4 · Public Service Values & Probity", points:["Public/civil service ethics — status, problems, ethical dilemmas","Laws, rules, regulations & conscience as sources of ethical guidance","Accountability & ethical governance; corporate governance","Probity in governance — philosophical basis, RTI, codes of ethics/conduct, citizen's charters"]},
+  {start:D(2026,8,17), label:"GS4 · Case Studies — Applied Ethics", points:["Case-study frameworks: stakeholder mapping, conflict of interest, decision matrix","Practice case studies across the entire GS4 syllabus","Model-answer structuring for case studies (facts → dilemma → options → decision)"]},
+];
+const GS3_WEEKS = [
+  {start:D(2026,8,24), label:"GS3 · Indian Economy", points:["Planning, mobilisation of resources, growth, employment","Inclusive growth & related issues; Government Budgeting","Effects of liberalisation; industrial policy & industrial growth","Infrastructure — energy, ports, roads, airports, railways; investment models"]},
+  {start:D(2026,8,31), label:"GS3 · Agriculture", points:["Cropping patterns, irrigation systems, storage/transport/marketing, e-technology","Farm subsidies, MSP, PDS, buffer stocks & food security, technology missions","Food processing industries — scope, supply chain","Land reforms in India"]},
+  {start:D(2026,9,7),  label:"GS3 · Disaster, Environment & S&T", points:["Disaster & disaster management","Conservation, pollution, degradation, EIA","Science & technology developments & applications in daily life","Indian achievements in S&T; IT, space, robotics, nano/bio-tech, IPR issues"]},
+  {start:D(2026,9,14), label:"GS3 · Internal Security", points:["Linkages between development & extremism","External/non-state actors & internal security challenges","Cyber security, media/social networks, money laundering","Border security, organised crime–terror linkages, security forces & mandates"]},
+  {start:D(2026,9,21), label:"GS3 · Consolidation + Essay-2 prep", points:["Integrated PYQ sweep across all 4 GS3 sectionals","Essay-2 (250 marks) outline practice on economy/security themes","Weak-area drilling ahead of GS3 FLT-1"]},
+];
+const GS2_WEEKS = [
+  {start:D(2026,9,28), label:"GS2 · Constitution & Polity", points:["Constitution — evolution, features, amendments, basic structure","Union–State relations, federal structure, devolution of powers","Separation of powers, dispute redressal institutions","Parliament & State legislatures; Executive & Judiciary structure"]},
+  {start:D(2026,10,5), label:"GS2 · Bodies, Schemes & Welfare", points:["Representation of People's Act — salient features","Constitutional/statutory/regulatory/quasi-judicial bodies","Welfare schemes for vulnerable sections; health, education, HR sector issues","Poverty & hunger issues"]},
+  {start:D(2026,10,12),label:"GS2 · Governance", points:["Government policies & interventions — design/implementation issues","Development industry — NGOs, SHGs, donors, stakeholders","E-governance, transparency, accountability, citizens' charters","Role of civil services in a democracy"]},
+  {start:D(2026,10,19),label:"GS2 · International Relations", points:["India & neighbourhood relations","Bilateral/regional/global groupings & agreements","Effect of developed/developing nations' policies on India; diaspora","Key international institutions — structure & mandate"]},
+  {start:D(2026,10,26),label:"GS2 · Consolidation + Essay-3 prep", points:["Integrated PYQ sweep across all 4 GS2 sectionals","Essay-3 outline practice on polity/governance/IR themes","Weak-area drilling ahead of GS2 FLT-1"]},
+];
+const GS1_WEEKS = [
+  {start:D(2026,11,2), label:"GS1 · Modern History & Freedom Struggle + Post-Independence/World History/Culture", points:["Modern India from mid-18th century to present","Freedom struggle — stages, contributors across regions","Post-independence consolidation & reorganisation","World history — industrial revolution, world wars, decolonisation, political philosophies","Indian art forms, literature & architecture — ancient to modern"]},
+  {start:D(2026,11,9), label:"GS1 · Society, Geography & Final Sweep", points:["Salient features & diversity of Indian society","Women & women's organisations, population, poverty, urbanisation","Globalisation's effects on society; social empowerment, communalism, regionalism","World physical geography, geophysical phenomena, resource distribution","Full GS1 PYQ sweep ahead of GS1 FLT-1"]},
+];
+const GS_ALL = [...GS4_WEEKS.map(w=>({...w,subj:"GS4"})), ...GS3_WEEKS.map(w=>({...w,subj:"GS3"})), ...GS2_WEEKS.map(w=>({...w,subj:"GS2"})), ...GS1_WEEKS.map(w=>({...w,subj:"GS1"}))];
+function getGSWeek(dt){ let chosen=GS_ALL[0]; for(const w of GS_ALL){ if(dt>=w.start) chosen=w; else break; } return chosen; }
+
+const OPT_TOPICS = [
+  {start:D(2026,7,27), part:"Part-A", label:"Social-Political Ideals: Equality, Justice, Liberty"},
+  {start:D(2026,8,3),  part:"Part-A", label:"Sovereignty — Austin, Bodin, Laski, Kautilya"},
+  {start:D(2026,8,10), part:"Part-A", label:"Individual & State — Rights, Duties, Forms of Government"},
+  {start:D(2026,8,17), part:"Part-A", label:"Political Ideologies — Anarchism, Marxism, Socialism, Humanism, Secularism, Multiculturalism"},
+  {start:D(2026,8,24), part:"Part-A", label:"Crime & Punishment"},
+  {start:D(2026,8,31), part:"Part-A", label:"Development & Social Progress"},
+  {start:D(2026,9,7),  part:"Part-A", label:"Gender Discrimination & Caste Discrimination — Gandhi, Ambedkar"},
+  {start:D(2026,9,14), part:"Part-B", label:"Concept of God — Attributes & Relation to Man/World (Indian & Western)"},
+  {start:D(2026,9,21), part:"Part-B", label:"Proofs for Existence of God & Their Critiques"},
+  {start:D(2026,9,28), part:"Part-B", label:"Problem of Evil"},
+  {start:D(2026,10,5), part:"Part-B", label:"Soul — Immortality, Rebirth, Liberation"},
+  {start:D(2026,10,8), part:"Part-B", label:"Reason, Revelation, Faith & Religious Experience"},
+  {start:D(2026,10,9), part:"Part-B", label:"Nature of Religious Language"},
+  {start:D(2026,10,10),part:"Part-B", label:"Religion & Morality; Religious Pluralism"},
+];
+function getOptTopic(dt){
+  if(dt>D(2026,10,10)) return {part:"Revision", label:"Full Paper-2 revision & PYQ cycling (syllabus already complete)"};
+  let chosen=OPT_TOPICS[0]; for(const t of OPT_TOPICS){ if(dt>=t.start) chosen=t; else break; } return chosen;
+}
+
+const GEO_TOPICS = ["Physical Geography — landforms & processes","Indian Geography — physiography, drainage, climate","World Geography — continents, climate belts","Economic Geography — resources & industry location","Climatology & Oceanography","Bihar-specific geography & current relevance","Map-based PYQ practice","Population, settlement & migration geography"];
+function getGeoTopic(dt){ const idx = Math.floor((dt-SCHEDULE_START)/86400000) % GEO_TOPICS.length; return GEO_TOPICS[idx]; }
+
+const TESTS = [
+  {date:D(2026,8,4),  label:"GS4 Sectional Test-1", syl:"Ethics & Human Interface, Attitude, Aptitude, EI, Moral Thinkers"},
+  {date:D(2026,8,11), label:"GS4 Sectional Test-2", syl:"Public/Civil Service Ethics, Probity in Governance"},
+  {date:D(2026,8,18), label:"GS4 Sectional Test-3 (Case Studies)", syl:"Entire GS4 syllabus — case studies"},
+  {date:D(2026,8,25), label:"GS4 FLT-1 + Essay Test-1 (combined week)", syl:"Entire GS4 (Tue) · Essay 125 marks (Thu)"},
+  {date:D(2026,9,1),  label:"GS3 Sectional Test-1", syl:"Economy, planning, growth, employment, budgeting, infrastructure"},
+  {date:D(2026,9,8),  label:"GS3 Sectional Test-2", syl:"Agriculture, irrigation, MSP/PDS, food processing, land reforms"},
+  {date:D(2026,9,15), label:"GS3 Sectional Test-3", syl:"Disaster mgmt, environment, S&T"},
+  {date:D(2026,9,22), label:"GS3 Sectional Test-4 + Essay Test-2 (combined week)", syl:"Internal security (Tue) · Essay 250 marks (Thu)"},
+  {date:D(2026,9,29), label:"GS3 FLT-1", syl:"Entire GS3 syllabus"},
+  {date:D(2026,10,6), label:"GS2 Sectional Test-1", syl:"Constitution, federal structure, Parliament, Executive/Judiciary"},
+  {date:D(2026,10,13),label:"GS2 Sectional Test-2", syl:"RPA, constitutional/statutory bodies, welfare schemes, poverty/hunger"},
+  {date:D(2026,10,20),label:"GS2 Sectional Test-3 + Essay Test-3 (combined week)", syl:"Governance, e-governance, civil services (Tue) · Essay 125 marks (Thu)"},
+  {date:D(2026,10,27),label:"GS2 Sectional Test-4", syl:"India–neighbourhood, groupings, IR, international institutions"},
+  {date:D(2026,11,3), label:"GS2 FLT-1", syl:"Entire GS2 syllabus"},
+  {date:D(2026,11,10),label:"GS1 Sectional Test-1 + Test-2 (combined)", syl:"Modern history/freedom struggle · Post-independence/world history/culture"},
+  {date:D(2026,11,17),label:"GS1 Sectional Test-3 + Test-4 + Essay Test-4 (combined)", syl:"Society & geography (Tue) · Essay 250 marks (Thu)"},
+  {date:D(2026,11,20),label:"GS1 FLT-1 — Series Capstone", syl:"Entire GS1 syllabus · Series closes here"},
+];
+const OPT_TESTS = [
+  {date:D(2026,8,22), label:"Optional Mock-1", syl:"Part-A: Social-political ideals, Sovereignty, Individual & State"},
+  {date:D(2026,9,12), label:"Optional Mock-2", syl:"Part-A: Ideologies, Crime & Punishment, Development, Gender/Caste"},
+  {date:D(2026,9,26), label:"Optional Mock-3", syl:"Part-B: God, Proofs & Critiques, Problem of Evil"},
+  {date:D(2026,10,10),label:"Optional Mock-4", syl:"Part-B: Soul, Reason/Revelation/Faith, Religious Language, Religion & Morality"},
+];
+function testOnDate(dt){ return TESTS.find(t=>fmt(t.date)===fmt(dt)); }
+function optTestOnDate(dt){ return OPT_TESTS.find(t=>fmt(t.date)===fmt(dt)); }
+
+const QUOTES = [
+  "Discipline is choosing between what you want now and what you want most.",
+  "The syllabus doesn't care how you feel today — show up anyway, even for two hours.",
+  "One honestly-attempted PYQ teaches more than three passively-read chapters.",
+  "Rank under 300 is built in the ordinary Tuesday afternoons, not the exam-eve nights.",
+  "Write daily. The exam only rewards what your hand can produce in 7-8 minutes per answer.",
+  "Consistency beats intensity — a tired 80% day beats a skipped 0% day, every time.",
+  "Every fact you log today is one less panic-search the night before Mains.",
+  "Backlog is not failure. Ignoring backlog is.",
+  "The test series is a mirror, not a verdict — read it, don't fear it.",
+  "Sunday's rest is earned, not defaulted. Clear backlog first, then rest with a clear conscience.",
+];
+function quoteFor(dt){ const idx = Math.floor((dt-SCHEDULE_START)/86400000) % QUOTES.length; return QUOTES[(idx+QUOTES.length)%QUOTES.length]; }
+
+const APPRECIATIONS = [
+  "Full day cleared. That's exactly how a rank under 300 gets built — one complete day at a time.",
+  "Every slot ticked. Professor, this is the standard — keep it.",
+  "100% today. Log it, feel it for a minute, then let it fuel tomorrow.",
+  "Nothing left pending today. That discipline is the actual syllabus you're mastering.",
+  "Day closed clean. This is what separates a plan from a result.",
+];
+
+/* ================= Phase & schedule generation ================= */
+function phaseOf(dt){
+  if(dt<SCHEDULE_START || dt>UPPSC_PRELIMS) return "out";
+  if(dt<=BPSC_EXAM) return "bpsc";
+  if(fmt(dt)===fmt(REST1) || fmt(dt)===fmt(REST2)) return "rest";
+  if(dt<=SCHEDULE_END) return "mains";
+  return "post";
+}
+
+function buildBlocks(dt){
+  const phase = phaseOf(dt);
+  const isSun = dayName(dt)==="Sun";
+  const isSat = dayName(dt)==="Sat";
+  const t = testOnDate(dt);
+  const ot = optTestOnDate(dt);
+  let blocks = [];
+
+  if(phase==="bpsc"){
+    blocks.push({time:"07:00–10:00", desc:`UPSC Mains — GS1 head-start — <b>${getGeoTopic(dt)}</b><br><span style="font-size:12.5px;color:#5a4f36;">Your BPSC preparation runs full-day outside this ledger — this 3h slot is purely a Mains GS1 advance.</span>`, tag:"3h · Mains GS"});
+    blocks.push({time:"After 10:00", desc:"Rest of the day belongs to BPSC — not tracked here.", tag:null});
+    return blocks;
+  }
+  if(phase==="rest"){
+    blocks.push({time:"Flexible", desc:"Post-BPSC recovery day. No fixed slots — light optional revision only if you feel like it; otherwise full rest before Mains prep opens on 27 Jul.", tag:"REST"});
+    return blocks;
+  }
+  if(phase==="out" || phase==="post"){
+    blocks.push({time:"—", desc:"Outside this ledger's built range (3 Jul – 20 Nov 2026). Ask and I'll extend the ledger toward UPPSC Prelims (24 Dec).", tag:null});
+    return blocks;
+  }
+
+  const gsWeek = getGSWeek(dt);
+  const optTopic = getOptTopic(dt);
+
+  if(isSun){
+    blocks.push({time:"07:00–09:00", desc:`Weak-topic revision — <b>${gsWeek.subj}</b>: ${gsWeek.label}`, tag:"Sun · Light"});
+    blocks.push({time:"09:00–11:00", desc:"Backlog clearance — finish anything unticked from this week. If nothing pending: leisure / walk / family time instead.", tag:"Sun · Light"});
+    blocks.push({time:"Rest of day", desc:"Full rest. This is by design — a 4-hour lighter Sunday keeps the next 6 weeks sustainable.", tag:null});
+    return blocks;
+  }
+
+  if(t){
+    blocks.push({time:"07:00–11:00", desc:`<b>MAINS TEST SERIES — ${t.label}</b><br><span style="font-size:12.5px;color:#5a4f36;">${t.syl}</span>`, tag:"test"});
+  } else {
+    blocks.push({time:"07:00–11:00", desc:`Revision — <b>${gsWeek.subj}</b>: ${gsWeek.label}`, tag:null});
+  }
+  blocks.push({time:"11:00–11:30", desc:"Short break", tag:null});
+  blocks.push({time:"11:30–13:00", desc: t ? "Test analysis — rewrite 2 weakest answers from today's paper." : `Answer writing practice — 2–3 answers, <b>${gsWeek.subj}</b> theme of the day`, tag:null});
+  blocks.push({time:"13:00–14:30", desc:"Break — food", tag:null});
+
+  if(ot){
+    blocks.push({time:"14:30–17:45", desc:`<b>OPTIONAL PAPER-2 MOCK — ${ot.label}</b><br><span style="font-size:12.5px;color:#5a4f36;">${ot.syl}</span>`, tag:"test"});
+  } else {
+    blocks.push({time:"14:30–17:45", desc:`Revision & notes-making — <b>Optional Paper-2 (${optTopic.part})</b>: ${optTopic.label}`, tag:null});
+  }
+  blocks.push({time:"17:45–18:00", desc:"Short break", tag:null});
+  blocks.push({time:"18:00–18:45", desc:"Current affairs", tag:null});
+  blocks.push({time:"18:45–19:40", desc:"Walk / unwind (no study material)", tag:null});
+  if(isSat){
+    blocks.push({time:"19:45–20:30", desc:"<b>Weekly Mentorship Session</b> — daily answer writing + Mains test series review", tag:"Mentor"});
+    blocks.push({time:"20:30–22:00", desc:"Fact & data enrichment material for answer writing", tag:null});
+  } else {
+    blocks.push({time:"19:45–22:00", desc:"Fact & data enrichment material for answer writing", tag:null});
+  }
+  blocks.push({time:"22:00–23:30", desc:"Break — food", tag:null});
+  blocks.push({time:"23:30–01:00", desc:`PYQ practice — <b>${gsWeek.subj}</b> + Optional (target: 6 PYQ answers per hour)`, tag:null});
+  return blocks;
+}
+
+/* ================= Storage layer (dual backend, crash-safe) ================= */
+function hasClaudeStorage(){ return typeof window.storage !== 'undefined' && window.storage; }
+let syncState = 'local';
+function setSync(state){
+  syncState = state;
+  const el = document.getElementById('syncBadge');
+  if(!el) return;
+  el.className = 'syncbadge mono ' + (state==='ok'?'ok':state==='saving'?'saving':'local');
+  el.textContent = state==='ok' ? 'Synced' : state==='saving' ? 'Saving…' : 'Local only';
+}
+async function storeGetRaw(key){
+  if(hasClaudeStorage()){
+    try{ const r = await window.storage.get(key,false); if(r) { setSync('ok'); return r.value; } }catch(e){}
+  }
+  try{ const v = localStorage.getItem(key); if(v!==null) return v; }catch(e){}
+  return null;
+}
+async function storeSetRaw(key, value){
+  let ok = false;
+  try{ localStorage.setItem(key,value); ok = true; }catch(e){}
+  if(hasClaudeStorage()){
+    try{ const r = await window.storage.set(key, value, false); if(r){ ok = true; setSync('ok'); } }
+    catch(e){ if(ok) setSync('local'); }
+  } else if(ok){ setSync('local'); }
+  if(ok) scheduleCloudSync();
+  return ok;
+}
+async function storeListKeys(prefix){
+  const keys = new Set();
+  if(hasClaudeStorage()){
+    try{ const r = await window.storage.list(prefix, false); if(r && r.keys) r.keys.forEach(k=>keys.add(k)); }catch(e){}
+  }
+  try{ for(let i=0;i<localStorage.length;i++){ const k = localStorage.key(i); if(k && k.startsWith(prefix)) keys.add(k); } }catch(e){}
+  return Array.from(keys).sort();
+}
+
+/* ---- Cloud backup mirror (Firebase, optional, free tier) ---- */
+let cloudSyncTimer = null;
+function scheduleCloudSync(){
+  if(!FIREBASE_ENABLED) return;
+  clearTimeout(cloudSyncTimer);
+  cloudSyncTimer = setTimeout(cloudSyncAll, 4000);
+}
+async function gatherFullLocalState(){
+  const blob = {profile:null, days:{}, reports:{}, updatedAt:new Date().toISOString()};
+  try{ const p = localStorage.getItem('profile'); if(p) blob.profile = JSON.parse(p); }catch(e){}
+  for(let i=0;i<localStorage.length;i++){
+    const k = localStorage.key(i);
+    if(!k) continue;
+    if(k.startsWith('day:')){ try{ blob.days[k] = JSON.parse(localStorage.getItem(k)); }catch(e){} }
+    if(k.startsWith('report:')){ try{ blob.reports[k] = JSON.parse(localStorage.getItem(k)); }catch(e){} }
+  }
+  return blob;
+}
+function cloudDocRef(){
+  if(!FIREBASE_ENABLED || !fbDb) return null;
+  if(fbAuth && fbAuth.currentUser){
+    return fbDb.collection('users').doc(fbAuth.currentUser.uid).collection('mission2027').doc('ledgerData');
+  }
+  return fbDb.collection('mission2027').doc('ledgerData'); // fallback if auth not used
+}
+async function cloudSyncAll(){
+  const ref = cloudDocRef();
+  if(!ref) return;
+  try{
+    const blob = await gatherFullLocalState();
+    await ref.set(blob);
+    setSync('ok');
+  }catch(e){ console.error('cloud sync failed', e); }
+}
+async function cloudRestoreIfEmpty(){
+  const ref = cloudDocRef();
+  if(!ref) return;
+  const localDayKeys = await storeListKeys('day:');
+  if(localDayKeys.length>0) return; // this device already has data — never overwrite silently
+  try{
+    const doc = await ref.get();
+    if(!doc.exists) return;
+    const blob = doc.data();
+    if(!blob || !blob.days) return;
+    const count = Object.keys(blob.days).length;
+    if(count===0) return;
+    if(!confirm(`A cloud backup with ${count} logged day(s) was found. Restore it to this device?`)) return;
+    for(const k in blob.days){ localStorage.setItem(k, JSON.stringify(blob.days[k])); }
+    for(const k in (blob.reports||{})){ localStorage.setItem(k, JSON.stringify(blob.reports[k])); }
+    if(blob.profile) localStorage.setItem('profile', JSON.stringify(blob.profile));
+    alert('Cloud backup restored. Reloading…');
+    location.reload();
+  }catch(e){ console.error('cloud restore failed', e); }
+}
+async function cloudRestoreForce(){
+  const ref = cloudDocRef();
+  if(!ref) { showToast('Cloud backup is not set up yet — add your Firebase config first.'); return; }
+  try{
+    const doc = await ref.get();
+    if(!doc.exists){ showToast('No cloud backup found yet.'); return; }
+    const blob = doc.data();
+    if(!confirm('This will overwrite this device\'s data with the cloud backup. Continue?')) return;
+    for(const k in (blob.days||{})){ localStorage.setItem(k, JSON.stringify(blob.days[k])); }
+    for(const k in (blob.reports||{})){ localStorage.setItem(k, JSON.stringify(blob.reports[k])); }
+    if(blob.profile) localStorage.setItem('profile', JSON.stringify(blob.profile));
+    alert('Restored from cloud. Reloading…');
+    location.reload();
+  }catch(e){ alert('Restore failed: '+e.message); }
+}
+
+/* Day data model — versioned & migration-safe so old ticks never break */
+const corruptedKeys = new Set();
+function emptyDayData(n){ return {v:3, tasks:new Array(n).fill(false), edits:{}, custom:[], review:{rating:null,note:''}, appreciated:false, pyqCount:0}; }
+async function loadDayFull(key, blockCount){
+  const raw = await storeGetRaw(key);
+  if(!raw) return emptyDayData(blockCount);
+  try{
+    const parsed = JSON.parse(raw);
+    if(Array.isArray(parsed)){
+      const tasks = parsed.slice(0,blockCount);
+      while(tasks.length<blockCount) tasks.push(false);
+      return {v:3, tasks, edits:{}, custom:[], review:{rating:null,note:''}, appreciated:false, pyqCount:0};
+    }
+    if(parsed && typeof parsed==='object'){
+      return {
+        v:3,
+        tasks: Array.isArray(parsed.tasks) ? parsed.tasks : new Array(blockCount).fill(false),
+        edits: (parsed.edits && typeof parsed.edits==='object') ? parsed.edits : {},
+        custom: Array.isArray(parsed.custom) ? parsed.custom : [],
+        review: (parsed.review && typeof parsed.review==='object') ? {rating:parsed.review.rating??null, note:parsed.review.note||''} : {rating:null,note:''},
+        appreciated: !!parsed.appreciated,
+        pyqCount: Number.isFinite(parsed.pyqCount) ? parsed.pyqCount : 0
+      };
+    }
+    corruptedKeys.add(key);
+  }catch(e){ corruptedKeys.add(key); }
+  return emptyDayData(blockCount);
+}
+async function saveDayFull(key, data){ setSync('saving'); return await storeSetRaw(key, JSON.stringify(data)); }
+
+/* Combine generated blocks + edits + custom tasks into one view */
+async function getDayView(dt){
+  const generated = buildBlocks(dt);
+  const key = "day:"+fmt(dt);
+  let data = await loadDayFull(key, generated.length);
+  const edited = generated.map((b,i)=>{
+    const e = data.edits[i];
+    return e ? {time:e.time??b.time, desc:e.desc??b.desc, tag:b.tag} : b;
+  });
+  const custom = data.custom.map(c=>({time:c.time, desc:c.desc, tag:'Custom', isCustom:true}));
+  const combined = [...edited, ...custom];
+  if(data.tasks.length < combined.length){ while(data.tasks.length<combined.length) data.tasks.push(false); }
+  if(data.tasks.length > combined.length){ data.tasks = data.tasks.slice(0,combined.length); }
+  return {key, combined, data, generatedCount: generated.length};
+}
+
+/* ================= Profile / login (real auth when Firebase is on) ================= */
+async function getProfile(){
+  const raw = await storeGetRaw('profile');
+  if(!raw) return null;
+  try{ return JSON.parse(raw); }catch(e){ return null; }
+}
+async function saveProfile(p){ return await storeSetRaw('profile', JSON.stringify(p)); }
+
+function friendlyAuthError(code){
+  const map = {
+    'auth/wrong-password':'Wrong password. Try again.',
+    'auth/user-not-found':'No account with that email yet — use "First time — Create account" below.',
+    'auth/email-already-in-use':'An account already exists for that email — use "Sign In" instead.',
+    'auth/weak-password':'Password must be at least 6 characters.',
+    'auth/invalid-email':'That doesn\'t look like a valid email.',
+    'auth/invalid-credential':'Email or password is incorrect.',
+    'auth/too-many-requests':'Too many attempts — wait a minute and try again.',
+    'auth/network-request-failed':'No internet connection right now.'
+  };
+  return map[code] || 'Something went wrong. Try again.';
+}
+
+function showFirebaseAuthOverlay(){
+  const overlay = document.getElementById('loginOverlay');
+  const body = document.getElementById('ocardBody');
+  overlay.classList.remove('hidden');
+  body.innerHTML = `
+    <h2>Professor's Ledger</h2>
+    <p>Real password protection — this data is yours alone, on any device, anywhere. No one else can open it without this password.</p>
+    <label>Email</label>
+    <input type="text" id="authEmail" autocomplete="username" placeholder="you@example.com">
+    <label>Password</label>
+    <input type="password" id="authPass" autocomplete="current-password" placeholder="At least 6 characters">
+    <div class="oerr" id="oErr"></div>
+    <div class="oactions">
+      <button class="secondary" id="createAcctBtn">First time — Create</button>
+      <button id="signInBtn">Sign In</button>
+    </div>`;
+  function getCreds(){
+    return {email: document.getElementById('authEmail').value.trim(), pass: document.getElementById('authPass').value};
+  }
+  function showErr(msg){ const e=document.getElementById('oErr'); e.textContent=msg; e.style.display='block'; }
+  document.getElementById('signInBtn').addEventListener('click', async ()=>{
+    const {email,pass} = getCreds();
+    if(!email || !pass){ showErr('Enter both email and password.'); return; }
+    try{ await fbAuth.signInWithEmailAndPassword(email, pass); }
+    catch(e){ showErr(friendlyAuthError(e.code)); }
+  });
+  document.getElementById('createAcctBtn').addEventListener('click', async ()=>{
+    const {email,pass} = getCreds();
+    if(!email || !pass){ showErr('Enter both email and password.'); return; }
+    if(pass.length<6){ showErr('Password must be at least 6 characters.'); return; }
+    try{ await fbAuth.createUserWithEmailAndPassword(email, pass); }
+    catch(e){ showErr(friendlyAuthError(e.code)); }
+  });
+}
+
+function showOverlay(mode, existing){
+  const overlay = document.getElementById('loginOverlay');
+  const body = document.getElementById('ocardBody');
+  overlay.classList.remove('hidden');
+  if(mode==='setup'){
+    body.innerHTML = `
+      <h2>Set up your Ledger</h2>
+      <p>A 4-digit PIN is required so only you can open this on this device. This is a device-level lock, not encryption — for real cross-device password protection, set up the free Firebase cloud sync (ask in chat).</p>
+      <label>Name / Title</label>
+      <input type="text" id="pName" value="Professor" placeholder="Professor">
+      <label>PIN (required, 4 digits)</label>
+      <input type="password" id="pPin" maxlength="4" placeholder="4-digit PIN">
+      <div class="oerr" id="oErr"></div>
+      <div class="oactions"><button id="startBtn">Enter Ledger</button></div>`;
+    document.getElementById('startBtn').addEventListener('click', async ()=>{
+      const name = document.getElementById('pName').value.trim() || 'Professor';
+      const pin = document.getElementById('pPin').value.trim();
+      if(!/^[0-9]{4}$/.test(pin)){
+        document.getElementById('oErr').textContent = 'PIN must be exactly 4 digits.';
+        document.getElementById('oErr').style.display='block';
+        return;
+      }
+      await saveProfile({name, pin, createdAt: new Date().toISOString()});
+      overlay.classList.add('hidden');
+      applyProfileToUI({name, pin});
+      initAppAfterAuth();
+    });
+  } else if(mode==='unlock'){
+    body.innerHTML = `
+      <h2>Welcome back, ${existing.name}</h2>
+      <p>Enter your 4-digit PIN to open your ledger.</p>
+      <label>PIN</label>
+      <input type="password" id="pPinEnter" maxlength="4" placeholder="••••">
+      <div class="oerr" id="oErr"></div>
+      <div class="oactions"><button id="unlockBtn">Unlock</button></div>`;
+    document.getElementById('unlockBtn').addEventListener('click', ()=>{
+      const val = document.getElementById('pPinEnter').value.trim();
+      if(val===existing.pin){
+        overlay.classList.add('hidden');
+        applyProfileToUI(existing);
+        initAppAfterAuth();
+      } else {
+        document.getElementById('oErr').textContent = 'Incorrect PIN. Try again.';
+        document.getElementById('oErr').style.display='block';
+      }
+    });
+  } else if(mode==='edit'){
+    body.innerHTML = `
+      <h2>Edit Profile</h2>
+      <p>Update your display name${FIREBASE_ENABLED?'':' or PIN'}.</p>
+      <label>Name / Title</label>
+      <input type="text" id="pName" value="${existing.name}">
+      ${FIREBASE_ENABLED ? '' : `<label>PIN (4 digits, required)</label><input type="password" id="pPin" maxlength="4" value="${existing.pin||''}">`}
+      <div class="oerr" id="oErr"></div>
+      <div class="oactions">
+        <button class="secondary" id="cancelEdit">Cancel</button>
+        <button id="saveEdit">Save</button>
+      </div>
+      ${FIREBASE_ENABLED ? '<div class="oactions"><button class="secondary" id="signOutBtn" style="border-color:var(--red);color:#c0483a;">Sign out of this account</button></div>' : ''}`;
+    document.getElementById('cancelEdit').addEventListener('click', ()=>overlay.classList.add('hidden'));
+    document.getElementById('saveEdit').addEventListener('click', async ()=>{
+      const name = document.getElementById('pName').value.trim() || 'Professor';
+      let pinVal = existing.pin || null;
+      if(!FIREBASE_ENABLED){
+        pinVal = document.getElementById('pPin').value.trim();
+        if(!/^[0-9]{4}$/.test(pinVal)){
+          document.getElementById('oErr').textContent = 'PIN must be exactly 4 digits.';
+          document.getElementById('oErr').style.display='block';
+          return;
+        }
+      }
+      const updated = {name, pin: pinVal, createdAt: existing.createdAt};
+      await saveProfile(updated);
+      applyProfileToUI(updated);
+      overlay.classList.add('hidden');
+      showToast('Profile updated.');
+    });
+    const soBtn = document.getElementById('signOutBtn');
+    if(soBtn){
+      soBtn.addEventListener('click', async ()=>{
+        if(!confirm('Sign out? You\'ll need your email and password to open this ledger again.')) return;
+        overlay.classList.add('hidden');
+        await fbAuth.signOut();
+      });
+    }
+  }
+}
+function applyProfileToUI(p){
+  document.getElementById('greetName').textContent = `Welcome, ${p.name}`;
+  window.__profile = p;
+}
+document.getElementById('editProfileBtn').addEventListener('click', async ()=>{
+  const p = await getProfile();
+  showOverlay('edit', p || {name:'Professor', pin:null, createdAt:new Date().toISOString()});
+});
+
+/* ================= Rendering: main day card ================= */
+let currentDate = localMidnightUTC();
+let followingToday = true;
+if(currentDate<SCHEDULE_START) currentDate=new Date(SCHEDULE_START);
+if(currentDate>UPPSC_PRELIMS) currentDate=new Date(SCHEDULE_START);
+
+function daysBetween(a,b){ return Math.round((b-a)/86400000); }
+
+/* ---- Toast notifications (replace jarring alert() for routine confirmations) ---- */
+function showToast(msg, ms){
+  ms = ms || 2600;
+  let t = document.getElementById('toastEl');
+  if(!t){ t = document.createElement('div'); t.id='toastEl'; t.className='toast'; document.body.appendChild(t); }
+  t.textContent = msg;
+  clearTimeout(t._timer);
+  requestAnimationFrame(()=>t.classList.add('show'));
+  t._timer = setTimeout(()=>t.classList.remove('show'), ms);
+}
+
+/* ---- Online / offline awareness ---- */
+function updateOnlineStatus(){
+  const el = document.getElementById('offlineBadge');
+  if(!el) return;
+  el.classList.toggle('show', !navigator.onLine);
+}
+window.addEventListener('online', ()=>{ updateOnlineStatus(); showToast('Back online — cloud sync resumed.'); });
+window.addEventListener('offline', ()=>{ updateOnlineStatus(); showToast('Offline — still saving locally on this device.'); });
+
+/* ---- Focus Mode: hide every panel except today's checklist ---- */
+function applyFocusMode(on){
+  document.body.classList.toggle('focus-mode', on);
+  const btn = document.getElementById('focusModeBtn');
+  btn.classList.toggle('active', on);
+  btn.textContent = on ? '✕ Exit Focus Mode' : '🎯 Focus Mode';
+  try{ localStorage.setItem('ui:focusMode', on ? '1' : '0'); }catch(e){}
+}
+document.getElementById('focusModeBtn').addEventListener('click', ()=>{
+  applyFocusMode(!document.body.classList.contains('focus-mode'));
+});
+(function initFocusModePref(){
+  let saved = '0';
+  try{ saved = localStorage.getItem('ui:focusMode') || '0'; }catch(e){}
+  if(saved==='1') applyFocusMode(true);
+})();
+
+/* ---- Week-at-a-glance strip ---- */
+/* ---- Spaced Recall: resurface topics from 7 / 14 / 30 days ago ---- */
+function renderRecallPanel(){
+  const el = document.getElementById('recallInner');
+  if(!el) return;
+  const phase = phaseOf(currentDate);
+  if(phase!=='mains' && phase!=='bpsc'){
+    el.innerHTML = '<p style="margin:0;color:#8fa79a;">No recall needed on a rest/off day — enjoy it.</p>';
+    return;
+  }
+  const offsets = [7,14,30];
+  const rows = [];
+  offsets.forEach(off=>{
+    const d = addDays(currentDate,-off);
+    if(d<MAINS_START) return;
+    const gw = getGSWeek(d);
+    const ot = getOptTopic(d);
+    rows.push(`<div class="healthrow"><span>${off} days ago (${fmt(d)})</span><span style="text-align:right;max-width:65%;">${gw.subj}: ${gw.label.split('·')[1]||gw.label} · ${ot.label}</span></div>`);
+  });
+  el.innerHTML = rows.length
+    ? `<p style="margin:0 0 8px;color:#8fa79a;font-size:12.5px;">Quick 5-minute recall before you start today's new material — don't re-study, just recall from memory first:</p>${rows.join('')}`
+    : '<p style="margin:0;color:#8fa79a;">Not enough history yet for recall — this fills in as you go.</p>';
+}
+
+async function renderWeekStrip(){
+  const el = document.getElementById('weekStrip');
+  if(!el) return;
+  const {mon} = weekBounds(currentDate);
+  let html = '';
+  for(let i=0;i<7;i++){
+    const d = addDays(mon,i);
+    const phase = phaseOf(d);
+    let pct = 0, has = false;
+    if(!(phase==='rest'||phase==='out'||phase==='post')){
+      const {combined, data} = await getDayView(d);
+      if(combined.length>0){ has = true; pct = Math.round(data.tasks.filter(Boolean).length/combined.length*100); }
+    }
+    const isCurrent = fmt(d)===fmt(currentDate);
+    html += `<div class="wsdot ${isCurrent?'current':''}" data-date="${fmt(d)}" title="${fmt(d)}">
+      <div class="wsday mono">${dayName(d)}</div>
+      <div class="wsbar"><div class="wsfill" style="width:${has?pct:0}%;background:${has?'':'#8a7f5f'}"></div></div>
+    </div>`;
+  }
+  el.innerHTML = html;
+  el.style.display = 'flex';
+  el.querySelectorAll('.wsdot').forEach(dot=>{
+    dot.addEventListener('click', ()=>{
+      followingToday = false;
+      const [y,m,dd] = dot.dataset.date.split('-').map(Number);
+      currentDate = D(y,m,dd);
+      renderDay();
+    });
+  });
+}
+
+/* ---- Jump to next test day ---- */
+document.getElementById('nextTestBtn').addEventListener('click', ()=>{
+  const all = [...TESTS.map(t=>t.date), ...OPT_TESTS.map(t=>t.date)].sort((a,b)=>a-b);
+  const next = all.find(d=>d>currentDate);
+  if(!next){ showToast('No more test days ahead in this ledger.'); return; }
+  followingToday = false;
+  currentDate = next;
+  renderDay();
+  showToast(`Jumped to ${fmt(next)} — ${(testOnDate(next)||optTestOnDate(next)).label}`);
+});
+
+/* ---- Search across schedule, reviews, and custom tasks ---- */
+document.getElementById('searchToggleBtn').addEventListener('click', ()=>{
+  const box = document.getElementById('searchBox');
+  box.style.display = box.style.display==='none' ? 'block' : 'none';
+  if(box.style.display==='block') document.getElementById('searchInput').focus();
+});
+async function runSearch(query){
+  const q = query.trim().toLowerCase();
+  if(!q) return [];
+  const results = [];
+  for(let d=new Date(SCHEDULE_START); d<=SCHEDULE_END; d=addDays(d,1)){
+    const phase = phaseOf(d);
+    if(phase==='rest'||phase==='out'||phase==='post') continue;
+    const blocks = buildBlocks(d);
+    for(const b of blocks){
+      const plain = b.desc.replace(/<[^>]+>/g,'');
+      if(plain.toLowerCase().includes(q)){ results.push({date:new Date(d), snippet:plain.slice(0,100), type:'Schedule'}); break; }
+    }
+  }
+  const keys = await storeListKeys('day:');
+  for(const k of keys){
+    const raw = await storeGetRaw(k);
+    if(!raw) continue;
+    try{
+      const parsed = JSON.parse(raw);
+      if(Array.isArray(parsed)) continue;
+      const dt = new Date(k.replace('day:','')+'T00:00:00Z');
+      if(parsed.review && parsed.review.note && parsed.review.note.toLowerCase().includes(q)){
+        results.push({date:dt, snippet:'Review: '+parsed.review.note.slice(0,90), type:'Review'});
+      }
+      (parsed.custom||[]).forEach(c=>{
+        if((c.desc||'').toLowerCase().includes(q)) results.push({date:dt, snippet:'Custom task: '+c.desc.slice(0,90), type:'Custom'});
+      });
+    }catch(e){}
+  }
+  results.sort((a,b)=>a.date-b.date);
+  return results.slice(0,60);
+}
+async function doSearch(){
+  const q = document.getElementById('searchInput').value;
+  const out = document.getElementById('searchResults');
+  if(!q.trim()){ out.innerHTML = '<p style="color:#8fa79a;font-size:12px;margin:0;">Type something to search.</p>'; return; }
+  out.innerHTML = '<div class="loading">Searching…</div>';
+  const results = await runSearch(q);
+  if(results.length===0){ out.innerHTML = '<p style="color:#8fa79a;font-size:12px;margin:0;">No matches found.</p>'; return; }
+  out.innerHTML = results.map(r=>`<div class="hrow" data-date="${fmt(r.date)}" style="cursor:pointer;"><span class="hp mono">${fmt(r.date)}</span><span style="text-align:right;max-width:70%;">[${r.type}] ${r.snippet}</span></div>`).join('');
+  out.querySelectorAll('.hrow').forEach(row=>{
+    row.addEventListener('click', ()=>{
+      followingToday = false;
+      const [y,m,dd] = row.dataset.date.split('-').map(Number);
+      currentDate = D(y,m,dd);
+      renderDay();
+      document.getElementById('searchBox').style.display = 'none';
+    });
+  });
+}
+document.getElementById('searchGoBtn').addEventListener('click', doSearch);
+document.getElementById('searchInput').addEventListener('keydown', (e)=>{ if(e.key==='Enter') doSearch(); });
+
+/* ---- Keyboard shortcuts (desktop) — saves repeated tapping ---- */
+document.addEventListener('keydown', (e)=>{
+  const tag = (e.target.tagName||'').toLowerCase();
+  if(tag==='input' || tag==='textarea') return; // don't hijack typing
+  if(e.key==='ArrowLeft'){ document.getElementById('prevDay').click(); }
+  else if(e.key==='ArrowRight'){ document.getElementById('nextDay').click(); }
+  else if(e.key.toLowerCase()==='t'){ document.getElementById('jumpToday').click(); }
+  else if(e.key.toLowerCase()==='f'){ e.preventDefault(); document.getElementById('searchToggleBtn').click(); }
+});
+
+function renderCounters(){
+  const today = localMidnightUTC();
+  const wrap = document.getElementById('counters');
+  const items = [];
+  const dToBpsc = daysBetween(today,BPSC_EXAM);
+  const dToMainsEnd = daysBetween(today,SCHEDULE_END);
+  const dToUppsc = daysBetween(today,UPPSC_PRELIMS);
+  items.push({num:(dToBpsc>=0?dToBpsc:"Done"), lbl:"Days to BPSC (24 Jul)"});
+  items.push({num:(dToMainsEnd>=0?dToMainsEnd:"Done"), lbl:"Days to Series Close (20 Nov)", ms:true});
+  items.push({num:(dToUppsc>=0?dToUppsc:"Done"), lbl:"Days to UPPSC Prelims (24 Dec)"});
+  const total = daysBetween(SCHEDULE_START,SCHEDULE_END);
+  const elapsed = Math.min(Math.max(daysBetween(SCHEDULE_START,today),0),total);
+  items.push({num:`${elapsed}/${total}`, lbl:"Ledger day count"});
+  wrap.innerHTML = items.map(i=>`<div class="counter ${i.ms?'milestone':''}"><div class="num mono">${i.num}</div><div class="lbl">${i.lbl}</div></div>`).join('');
+}
+
+async function renderDay(){
+  const card = document.getElementById('dayCard');
+  card.innerHTML = '<div class="loading">Loading day…</div>';
+  document.getElementById('datePicker').value = fmt(currentDate);
+
+  const phase = phaseOf(currentDate);
+  const {key, combined, data} = await getDayView(currentDate);
+  const total = combined.length;
+  const doneCount = data.tasks.filter(Boolean).length;
+
+  const phaseLabel = {bpsc:"BPSC Days · 3h Mains GS",rest:"Recovery",mains:"Mains Prep",out:"Outside Range",post:"Outside Range"}[phase];
+  const phaseClass = {bpsc:"bpsc",rest:"rest",mains:"mains",out:"rest",post:"rest"}[phase];
+  const hasTest = testOnDate(currentDate) || optTestOnDate(currentDate);
+  let priorityText = '';
+  if(hasTest){
+    priorityText = `Today's #1 priority: sit the ${hasTest.label} like the real exam — full time, no notes, no pausing. Everything else today is secondary.`;
+  } else if(phase==='mains'){
+    priorityText = `Today's #1 priority: the 11:30–13:00 answer-writing block. Everything else builds knowledge; only this block builds exam-day speed.`;
+  } else if(phase==='bpsc'){
+    priorityText = `Today's #1 priority: BPSC. The 3h Mains slot here is insurance — don't let it eat into BPSC focus.`;
+  }
+
+  let html = `<div class="dayhead"><h2>${longDate(currentDate)}</h2><span class="phasepill ${hasTest?'test':phaseClass}">${hasTest?'Test Day':phaseLabel}</span></div>`;
+  if(priorityText){ html += `<div style="padding:10px 18px;background:#1c2e28;color:#e0c68a;font-size:12.5px;border-bottom:1px solid var(--line);">🎯 ${priorityText}</div>`; }
+  html += `<div class="progresswrap"><div class="progressbar"><div class="fill" style="width:${total?Math.round(doneCount/total*100):0}%"></div></div><div class="pct mono">${doneCount}/${total}</div></div>`;
+  html += `<div id="saveWarn" style="display:none;align-items:center;justify-content:space-between;gap:8px;background:#e6d0c9;color:#6a2c1c;padding:8px 18px;font-size:12.5px;">
+    <span>⚠ Save didn't fully sync — it's kept in this browser though. Tap retry to try syncing again.</span>
+    <button id="retrySave" style="background:#9c3b2c;color:#fff;border:none;padding:5px 10px;font-family:'Courier New',monospace;font-size:11px;cursor:pointer;">Retry</button></div>`;
+  html += `<div class="appreciate ${doneCount>0 && doneCount===total ? 'show':''}" id="appreciateBar">🏅 ${APPRECIATIONS[Math.floor((currentDate-SCHEDULE_START)/86400000)%APPRECIATIONS.length]}</div>`;
+  html += `<div class="quickrow">
+    <button id="markAllBtn">✓ Mark all remaining done</button>
+    <button id="clearAllBtn">↺ Clear all ticks</button>
+  </div>`;
+  html += `<div class="focustimer">
+    <span class="ftlabel">Focus timer</span>
+    <span class="ftdisplay mono" id="ftDisplay">25:00</span>
+    <span>
+      <button id="ftStart">Start 25m</button>
+      <button class="secondary" id="ftReset">Reset</button>
+    </span>
+  </div>`;
+
+  html += '<ul class="blocks">';
+  combined.forEach((b,i)=>{
+    const checked = !!data.tasks[i];
+    const tagHtml = b.tag ? `<span class="tag ${b.tag==='test'?'test':''}">${b.tag}</span>` : '';
+    html += `<li class="${checked?'done':''}" data-idx="${i}">
+      <input type="checkbox" ${checked?'checked':''}>
+      <div class="time mono">${b.time}</div>
+      <div class="desc">${b.desc}${tagHtml}</div>
+      <div class="taskbtns">
+        <button class="editTaskBtn" data-idx="${i}" title="Edit">✎</button>
+        ${b.isCustom?`<button class="delTaskBtn" data-idx="${i}" title="Delete">✕</button>`:''}
+      </div>
+    </li>`;
+  });
+  html += '</ul>';
+  html += `<div class="addtaskrow"><button id="addTaskBtn">+ Add a custom task for this day</button></div>`;
+
+  html += `<div class="reviewbox">
+    <h4>Daily Review</h4>
+    <div class="stars" id="starRow">${[1,2,3,4,5].map(n=>`<span data-n="${n}" class="${data.review.rating>=n?'on':''}">★</span>`).join('')}</div>
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+      <label for="pyqInput" style="font-family:'Courier New',monospace;font-size:11.5px;color:#5a4f36;">PYQ answers written today:</label>
+      <input type="number" id="pyqInput" min="0" max="99" value="${data.pyqCount||0}" style="width:56px;padding:5px;border:1px solid #bfb28c;background:#faf6ea;font-family:'Courier New',monospace;">
+    </div>
+    <textarea id="reviewNote" placeholder="What went well today? What should change tomorrow?">${data.review.note||''}</textarea>
+    <div class="rbtns"><span class="rsaved" id="reviewSavedMsg"></span><button id="saveReviewBtn">Save review</button></div>
+  </div>`;
+
+  card.innerHTML = html;
+
+  document.getElementById('markAllBtn').addEventListener('click', async ()=>{
+    for(let i=0;i<data.tasks.length;i++) data.tasks[i] = true;
+    await saveDayFull(key, data);
+    renderDay();
+    showToast('All remaining tasks marked done, Professor.');
+  });
+  document.getElementById('clearAllBtn').addEventListener('click', async ()=>{
+    if(!confirm('Clear every tick for this day?')) return;
+    for(let i=0;i<data.tasks.length;i++) data.tasks[i] = false;
+    await saveDayFull(key, data);
+    renderDay();
+  });
+
+  (function setupFocusTimer(){
+    let seconds = 25*60, running = false, intervalId = null;
+    const disp = document.getElementById('ftDisplay');
+    const startBtn = document.getElementById('ftStart');
+    const resetBtn = document.getElementById('ftReset');
+    function render(){
+      const m = String(Math.floor(seconds/60)).padStart(2,'0');
+      const s = String(seconds%60).padStart(2,'0');
+      disp.textContent = `${m}:${s}`;
+    }
+    function tick(){
+      seconds--;
+      render();
+      if(seconds<=0){
+        clearInterval(intervalId); running=false;
+        startBtn.textContent = 'Start 25m';
+        showToast('Focus block done — take a short break, Professor.', 4000);
+        seconds = 25*60; render();
+      }
+    }
+    startBtn.addEventListener('click', ()=>{
+      if(running){ clearInterval(intervalId); running=false; startBtn.textContent='Resume'; return; }
+      running = true; startBtn.textContent = 'Pause';
+      intervalId = setInterval(tick, 1000);
+    });
+    resetBtn.addEventListener('click', ()=>{
+      clearInterval(intervalId); running=false; seconds=25*60; render(); startBtn.textContent='Start 25m';
+    });
+    render();
+  })();
+
+  async function toggleIdx(idx, checked){
+    const li = card.querySelector(`li[data-idx="${idx}"]`);
+    li.classList.toggle('done', checked);
+    li.querySelector('input[type=checkbox]').checked = checked;
+    data.tasks[idx] = checked;
+    const ok = await saveDayFull(key, data);
+    const dc = data.tasks.filter(Boolean).length;
+    card.querySelector('.progressbar .fill').style.width = `${Math.round(dc/total*100)}%`;
+    card.querySelector('.progresswrap .pct').textContent = `${dc}/${total}`;
+    const bar = document.getElementById('appreciateBar');
+    if(dc>0 && dc===total){ bar.classList.add('show'); } else { bar.classList.remove('show'); }
+    const warn = document.getElementById('saveWarn');
+    if(!ok){ warn.style.display='flex'; warn.dataset.idx=idx; warn.dataset.checked=checked; }
+    else if(warn.style.display!=='none'){ warn.style.display='none'; }
+  }
+
+  card.querySelectorAll('input[type=checkbox]').forEach(cb=>{
+    cb.addEventListener('change',(e)=>{
+      const idx = parseInt(e.target.closest('li').dataset.idx,10);
+      toggleIdx(idx, e.target.checked);
+    });
+  });
+  document.getElementById('retrySave').onclick = ()=>{
+    const warn = document.getElementById('saveWarn');
+    toggleIdx(parseInt(warn.dataset.idx,10), warn.dataset.checked==='true');
+  };
+
+  card.querySelectorAll('.editTaskBtn').forEach(btn=>{
+    btn.addEventListener('click', async ()=>{
+      const idx = parseInt(btn.dataset.idx,10);
+      const b = combined[idx];
+      const plainDesc = b.desc.replace(/<[^>]+>/g,'');
+      const newTime = prompt('Time slot:', b.time);
+      if(newTime===null) return;
+      const newDesc = prompt('Task description:', plainDesc);
+      if(newDesc===null) return;
+      if(b.isCustom){
+        const customIdx = idx - (combined.length - data.custom.length);
+        data.custom[customIdx] = {time:newTime, desc:newDesc};
+      } else {
+        data.edits[idx] = {time:newTime, desc:newDesc};
+      }
+      await saveDayFull(key, data);
+      renderDay();
+    });
+  });
+  card.querySelectorAll('.delTaskBtn').forEach(btn=>{
+    btn.addEventListener('click', async ()=>{
+      const idx = parseInt(btn.dataset.idx,10);
+      if(!confirm('Delete this custom task?')) return;
+      const customIdx = idx - (combined.length - data.custom.length);
+      data.custom.splice(customIdx,1);
+      data.tasks.splice(idx,1);
+      await saveDayFull(key, data);
+      renderDay();
+    });
+  });
+  document.getElementById('addTaskBtn').addEventListener('click', async ()=>{
+    const t = prompt('Time slot (e.g. 20:00–20:30):','');
+    if(t===null) return;
+    const d = prompt('Task description:','');
+    if(d===null || d.trim()==='') return;
+    data.custom.push({time:t||'—', desc:d});
+    data.tasks.push(false);
+    await saveDayFull(key, data);
+    renderDay();
+  });
+
+  document.querySelectorAll('#starRow span').forEach(s=>{
+    s.addEventListener('click', ()=>{
+      const n = parseInt(s.dataset.n,10);
+      data.review.rating = (data.review.rating===n) ? null : n;
+      document.querySelectorAll('#starRow span').forEach(x=>x.classList.toggle('on', data.review.rating>=parseInt(x.dataset.n,10)));
+    });
+  });
+  document.getElementById('saveReviewBtn').addEventListener('click', async ()=>{
+    data.review.note = document.getElementById('reviewNote').value;
+    const pyqVal = parseInt(document.getElementById('pyqInput').value,10);
+    data.pyqCount = Number.isFinite(pyqVal) && pyqVal>=0 ? pyqVal : 0;
+    await saveDayFull(key, data);
+    document.getElementById('reviewSavedMsg').textContent = 'Saved ✓';
+    setTimeout(()=>{ const m=document.getElementById('reviewSavedMsg'); if(m) m.textContent=''; },2000);
+  });
+
+  const encourage = {
+    bpsc: "BPSC is the priority right now — this 3h is just insurance for your Mains timeline. Show up for it, then give the rest of the day fully to BPSC without guilt.",
+    rest: "You earned this. A tired mind studying is slower than a rested mind studying — this pause is strategy, not laziness.",
+    mains: "Rank under 300 is not decided on FLT day — it's decided on ordinary days like this one, ticked slot by slot.",
+    out: "", post: ""
+  }[phase];
+  document.getElementById('profNote').innerHTML = `<p class="quote">"${quoteFor(currentDate)}"</p>${encourage?`<p style="margin:10px 0 0;font-size:13px;color:#a9bdb2;">${encourage}</p>`:''}`;
+  renderWeekStrip();
+  renderRecallPanel();
+}
+
+function renderTestTable(){
+  const tbl = document.getElementById('testTable');
+  let html = '<tr><th>Date</th><th>Test</th><th>Syllabus</th></tr>';
+  TESTS.forEach(t=>{ html += `<tr class="clickable" data-date="${fmt(t.date)}"><td class="mono">${fmt(t.date)}</td><td>${t.label}</td><td>${t.syl}</td></tr>`; });
+  tbl.innerHTML = html;
+  const otbl = document.getElementById('optTable');
+  let ohtml = '<tr><th>Date</th><th>Mock</th><th>Covers</th></tr>';
+  OPT_TESTS.forEach(t=>{ ohtml += `<tr class="clickable" data-date="${fmt(t.date)}"><td class="mono">${fmt(t.date)}</td><td>${t.label}</td><td>${t.syl}</td></tr>`; });
+  otbl.innerHTML = ohtml;
+  [tbl, otbl].forEach(table=>{
+    table.querySelectorAll('tr.clickable').forEach(row=>{
+      row.addEventListener('click', ()=>{
+        followingToday = false;
+        const [y,m,dd] = row.dataset.date.split('-').map(Number);
+        currentDate = D(y,m,dd);
+        renderDay();
+        window.scrollTo({top:0, behavior:'smooth'});
+        showToast('Jumped to '+row.dataset.date);
+      });
+    });
+  });
+}
+
+/* ================= Backlog ================= */
+document.getElementById('loadBacklog').addEventListener('click', async ()=>{
+  const inner = document.getElementById('backlogInner');
+  inner.innerHTML = '<div class="loading">Scanning past days…</div>';
+  const today = localMidnightUTC();
+  const start = SCHEDULE_START;
+  let html = '';
+  let anyFound = false;
+  for(let d=new Date(start); d<today; d=addDays(d,1)){
+    const phase = phaseOf(d);
+    if(phase==='rest'||phase==='out'||phase==='post') continue;
+    const {key, combined, data} = await getDayView(d);
+    const pending = combined.map((b,i)=>({b,i})).filter(x=>!data.tasks[x.i]);
+    if(pending.length===0) continue;
+    anyFound = true;
+    html += `<div class="backlogday"><div class="bdhead"><span>${fmt(d)} (${dayName(d)})</span><span>${pending.length} pending</span></div>`;
+    pending.forEach(p=>{
+      const plain = p.b.desc.replace(/<[^>]+>/g,'');
+      html += `<div class="bditem"><input type="checkbox" data-key="${key}" data-idx="${p.i}"><span>${plain}</span></div>`;
+    });
+    html += `</div>`;
+  }
+  inner.innerHTML = anyFound ? html : '<p style="margin:0;color:#8fd6a8;">No backlog — every past day is fully ticked. Clean record, Professor.</p>';
+  inner.querySelectorAll('input[type=checkbox]').forEach(cb=>{
+    cb.addEventListener('change', async (e)=>{
+      const k = e.target.dataset.key;
+      const idx = parseInt(e.target.dataset.idx,10);
+      const raw = await storeGetRaw(k);
+      let d2;
+      try{ d2 = raw ? JSON.parse(raw) : null; }catch(err){ d2=null; }
+      if(!d2 || Array.isArray(d2)) return;
+      d2.tasks[idx] = e.target.checked;
+      await storeSetRaw(k, JSON.stringify(d2));
+      e.target.closest('.bditem').style.opacity = e.target.checked ? '0.45' : '1';
+    });
+  });
+});
+
+/* ================= Weekly AI Report ================= */
+function weekBounds(dt){
+  const dow = dt.getUTCDay();
+  const diffToMon = (dow===0) ? 6 : dow-1;
+  const mon = addDays(dt, -diffToMon);
+  const sun = addDays(mon, 6);
+  return {mon, sun};
+}
+document.getElementById('genReport').addEventListener('click', async ()=>{
+  const inner = document.getElementById('reportInner');
+  inner.innerHTML = '<div class="loading">Gathering this week\'s data…</div>';
+  const {mon, sun} = weekBounds(currentDate);
+  const cacheKey = 'report:'+fmt(mon);
+  const cached = await storeGetRaw(cacheKey);
+  const days = [];
+  const slotMiss = {}; // time-slot -> {miss, total}
+  for(let d=new Date(mon); d<=sun; d=addDays(d,1)){
+    const phase = phaseOf(d);
+    if(phase==='rest'||phase==='out'||phase==='post') continue;
+    const {combined, data} = await getDayView(d);
+    const done = data.tasks.filter(Boolean).length;
+    days.push({date:fmt(d), day:dayName(d), pct: combined.length? Math.round(done/combined.length*100):0, rating:data.review.rating, note:(data.review.note||'').slice(0,180), hasTest: !!(testOnDate(d)||optTestOnDate(d))});
+    combined.forEach((b,i)=>{
+      if(b.isCustom) return;
+      const key = b.time;
+      if(!slotMiss[key]) slotMiss[key] = {miss:0, total:0};
+      slotMiss[key].total++;
+      if(!data.tasks[i]) slotMiss[key].miss++;
+    });
+  }
+  const profile = window.__profile || {name:'Professor'};
+  const avgPct = days.length ? Math.round(days.reduce((s,d)=>s+d.pct,0)/days.length) : 0;
+
+  // Previous week for trend comparison
+  const prevMon = addDays(mon,-7);
+  let trendLine = '';
+  try{
+    const prevCache = await storeGetRaw('report:'+fmt(prevMon));
+    if(prevCache){
+      const prevObj = JSON.parse(prevCache);
+      if(typeof prevObj.avgPct === 'number'){
+        const diff = avgPct - prevObj.avgPct;
+        trendLine = diff>0 ? `Up ${diff} points versus last week (${prevObj.avgPct}%) — moving the right way.`
+                  : diff<0 ? `Down ${Math.abs(diff)} points versus last week (${prevObj.avgPct}%) — worth a closer look.`
+                  : `Exactly level with last week (${prevObj.avgPct}%) — steady, but there's room to push higher.`;
+      }
+    }
+  }catch(e){}
+
+  function worstSlot(){
+    let worst = null;
+    for(const k in slotMiss){
+      const s = slotMiss[k];
+      if(s.total<2) continue; // ignore one-off slots (e.g. test days)
+      const rate = s.miss/s.total;
+      if(rate>0 && (!worst || rate>worst.rate)) worst = {time:k, rate, miss:s.miss, total:s.total};
+    }
+    return worst;
+  }
+  function localReport(){
+    if(days.length===0) return '<p style="margin:0;color:#8fa79a;">No days logged yet this week — tick some tasks first, then generate the report.</p>';
+    const sorted = days.slice().sort((a,b)=>a.pct-b.pct);
+    const weak = sorted[0];
+    const strong = sorted[sorted.length-1];
+    const slot = worstSlot();
+    const lowRatingDays = days.filter(d=>d.rating!==null && d.rating<=2).length;
+    const testDays = days.filter(d=>d.hasTest).length;
+    const recs = [];
+    if(slot) recs.push(`Your most-skipped slot this week is <b>${slot.time}</b> (missed ${slot.miss} of ${slot.total} times) — protect that block first next week, everything else is holding up fine.`);
+    if(weak && weak.pct<60) recs.push(`${weak.day} (${weak.date}) was the weakest day at ${weak.pct}% — look at what broke the routine that day and plan around it in advance.`);
+    if(lowRatingDays>0) recs.push(`${lowRatingDays} day(s) got a self-rating of 2★ or below — re-read those review notes before next week starts, the pattern is usually repeatable.`);
+    if(testDays>0) recs.push(`${testDays} test day(s) this week — revisit the weakest-scoring section of each within 48 hours, that's when correction sticks best.`);
+    if(recs.length===0) recs.push('No specific weak point stood out — keep the same rhythm next week.');
+    return `<p style="margin-top:0;"><b>Week of ${fmt(mon)} – ${fmt(sun)}, ${profile.name}</b> — average completion <b>${avgPct}%</b> across ${days.length} logged day(s).${strong?` Best day: ${strong.day} at ${strong.pct}%.`:''}</p>
+      ${trendLine?`<p>${trendLine}</p>`:''}
+      <p><b>Next week:</b></p>
+      <ul style="margin:4px 0 0 18px;padding:0;">${recs.map(r=>`<li style="margin-bottom:6px;">${r}</li>`).join('')}</ul>`;
+  }
+
+  async function cacheAvg(){
+    try{ const raw = await storeGetRaw(cacheKey); const obj = raw?JSON.parse(raw):{}; obj.avgPct = avgPct; await storeSetRaw(cacheKey, JSON.stringify(obj)); }catch(e){}
+  }
+
+  if(cached){
+    try{
+      const c = JSON.parse(cached);
+      if(c.text){
+        inner.innerHTML = `<div style="white-space:pre-wrap;">${c.text}</div><p style="margin-top:10px;"><button id="regenBtn" style="background:none;border:1px solid var(--brass-dim);color:var(--brass);padding:6px 10px;font-family:'Courier New',monospace;font-size:11px;cursor:pointer;">Regenerate</button></p>`;
+        document.getElementById('regenBtn').addEventListener('click', ()=>{ storeSetRaw(cacheKey,''); document.getElementById('genReport').click(); });
+        return;
+      }
+    }catch(e){}
+  }
+
+  if(days.length===0){ inner.innerHTML = localReport(); return; }
+  await cacheAvg();
+
+  // Try a real AI-written version only when running inside Claude.ai (free & authorised there).
+  // On any hosted copy (GitHub Pages etc.) this is skipped automatically — the local report above
+  // already gives specific, data-grounded recommendations, so nothing is lost.
+  if(hasClaudeStorage()){
+    inner.innerHTML = '<div class="loading">Asking the AI for a performance summary…</div>';
+    const summaryLines = days.map(d=>`${d.date} (${d.day}): ${d.pct}% complete${d.rating?`, self-rating ${d.rating}/5`:''}${d.note?`, note: "${d.note}"`:''}`).join('\n');
+    const prompt_text = `You are a strict but encouraging UPSC Mains exam mentor. Address the student as "${profile.name}". Here is their week's study-tracker data (${fmt(mon)} to ${fmt(sun)}):\n${summaryLines}\n\nWrite: 1) a short 2-3 sentence performance summary, 2) exactly 3 concrete, specific recommendations for next week, 3) one short motivating closing line addressing them by name. Keep the whole reply under 180 words. Plain text, no markdown headers.`;
+    try{
+      const response = await fetch("https://api.anthropic.com/v1/messages", {
+        method: "POST",
+        headers: {"Content-Type":"application/json"},
+        body: JSON.stringify({ model: "claude-sonnet-4-6", max_tokens: 1000, messages: [{role:"user", content: prompt_text}] })
+      });
+      const dataResp = await response.json();
+      const text = (dataResp.content||[]).map(b=>b.type==='text'?b.text:'').join('\n').trim();
+      if(!text) throw new Error('empty response');
+      await storeSetRaw(cacheKey, JSON.stringify({text, avgPct}));
+      inner.innerHTML = `<div style="white-space:pre-wrap;">${text}</div><p style="margin-top:10px;"><button id="regenBtn" style="background:none;border:1px solid var(--brass-dim);color:var(--brass);padding:6px 10px;font-family:'Courier New',monospace;font-size:11px;cursor:pointer;">Regenerate</button></p>`;
+      document.getElementById('regenBtn').addEventListener('click', ()=>{ storeSetRaw(cacheKey,''); document.getElementById('genReport').click(); });
+      return;
+    }catch(e){ /* fall through to local report below */ }
+  }
+  inner.innerHTML = localReport();
+});
+
+/* ================= Appreciation & Streaks ================= */
+document.getElementById('refreshAch').addEventListener('click', async ()=>{
+  const inner = document.getElementById('achInner');
+  inner.innerHTML = '<div class="loading">Computing streaks…</div>';
+  const today = localMidnightUTC();
+  let streak = 0, best = 0, totalDaysLogged = 0, perfectDays = 0;
+  let d = addDays(today,-1);
+  let counting = true;
+  while(d>=SCHEDULE_START){
+    const phase = phaseOf(d);
+    if(phase==='rest'||phase==='out'||phase==='post'){ d=addDays(d,-1); continue; }
+    const {combined, data} = await getDayView(d);
+    const done = data.tasks.filter(Boolean).length;
+    if(combined.length>0){
+      totalDaysLogged++;
+      if(done===combined.length){
+        perfectDays++;
+        if(counting) streak++;
+        best = Math.max(best, streak);
+      } else { counting = false; }
+    }
+    d = addDays(d,-1);
+    if(daysBetween(SCHEDULE_START,today) - totalDaysLogged > 400) break;
+  }
+  const badges = [];
+  if(streak>=3) badges.push('🔥 3-day streak');
+  if(streak>=7) badges.push('🔥 7-day streak');
+  if(streak>=14) badges.push('🔥 14-day streak');
+  if(streak>=30) badges.push('🏆 30-day streak');
+  if(perfectDays>=1) badges.push('💯 First perfect day');
+  if(perfectDays>=25) badges.push('🏅 25 perfect days');
+  inner.innerHTML = `<p style="margin-top:0;">Current streak: <b>${streak} day(s)</b> · Perfect days logged: <b>${perfectDays}</b> of ${totalDaysLogged}</p>
+    <div class="badgewrap">${badges.length? badges.map(b=>`<span class="badge">${b}</span>`).join('') : '<span style="color:#8fa79a;font-size:12.5px;">No badges yet — complete a full day to start.</span>'}</div>`;
+});
+
+/* ================= Progress Overview ================= */
+document.getElementById('refreshAnalytics').addEventListener('click', async ()=>{
+  const grid = document.getElementById('analyticsGrid');
+  grid.innerHTML = '<div class="loading">Crunching numbers…</div>';
+  const today = localMidnightUTC();
+  let logged=0, sumPct=0, testsDone=0, reviewsWritten=0;
+  for(let d=new Date(SCHEDULE_START); d<today; d=addDays(d,1)){
+    const phase = phaseOf(d);
+    if(phase==='rest'||phase==='out'||phase==='post') continue;
+    const {combined, data} = await getDayView(d);
+    if(combined.length===0) continue;
+    logged++;
+    const done = data.tasks.filter(Boolean).length;
+    sumPct += Math.round(done/combined.length*100);
+    if(data.review.note && data.review.note.trim()) reviewsWritten++;
+    if(testOnDate(d) || optTestOnDate(d)) testsDone++;
+  }
+  const avg = logged? Math.round(sumPct/logged) : 0;
+  grid.innerHTML = `
+    <div class="ai"><div class="n mono">${logged}</div><div class="l">Days logged</div></div>
+    <div class="ai"><div class="n mono">${avg}%</div><div class="l">Avg completion</div></div>
+    <div class="ai"><div class="n mono">${testsDone}</div><div class="l">Test days passed</div></div>
+    <div class="ai"><div class="n mono">${reviewsWritten}</div><div class="l">Reviews written</div></div>`;
+});
+
+/* ================= Data Health ================= */
+document.getElementById('checkHealth').addEventListener('click', async ()=>{
+  const inner = document.getElementById('healthInner');
+  inner.innerHTML = '<div class="loading">Checking stored data…</div>';
+  corruptedKeys.clear();
+  const keys = await storeListKeys('day:');
+  for(const k of keys){
+    const raw = await storeGetRaw(k);
+    if(raw){ try{ JSON.parse(raw); }catch(e){ corruptedKeys.add(k); } }
+  }
+  let html = `<div class="healthrow"><span>Days stored</span><span class="mono">${keys.length}</span></div>
+    <div class="healthrow"><span>Corrupted entries</span><span class="mono" style="color:${corruptedKeys.size?'var(--red)':'#8fd6a8'};">${corruptedKeys.size}</span></div>
+    <div class="healthrow"><span>Storage backend</span><span class="mono">${hasClaudeStorage()?'Claude storage + local':'Local (browser) only'}</span></div>`;
+  if(corruptedKeys.size>0){
+    html += `<div class="actions" style="padding:12px 0 0;"><button class="danger" id="repairBtn">Repair ${corruptedKeys.size} corrupted entr${corruptedKeys.size===1?'y':'ies'}</button></div>`;
+  }
+  inner.innerHTML = html;
+  const repairBtn = document.getElementById('repairBtn');
+  if(repairBtn){
+    repairBtn.addEventListener('click', async ()=>{
+      if(!confirm('This resets corrupted day entries to empty (unticked). Unaffected days are untouched. Continue?')) return;
+      for(const k of corruptedKeys){
+        await storeSetRaw(k, JSON.stringify(emptyDayData(0)));
+      }
+      showToast('Repaired. Re-run the check to confirm.');
+      corruptedKeys.clear();
+      document.getElementById('checkHealth').click();
+    });
+  }
+});
+
+/* ================= Nav wiring ================= */
+document.getElementById('prevDay').addEventListener('click',()=>{ followingToday=false; currentDate=addDays(currentDate,-1); renderDay(); });
+document.getElementById('nextDay').addEventListener('click',()=>{ followingToday=false; currentDate=addDays(currentDate,1); renderDay(); });
+document.getElementById('jumpToday').addEventListener('click',()=>{
+  followingToday = true;
+  const t=localMidnightUTC();
+  currentDate = (t<SCHEDULE_START||t>UPPSC_PRELIMS) ? new Date(SCHEDULE_START) : t;
+  renderDay();
+});
+document.getElementById('datePicker').addEventListener('change',(e)=>{
+  followingToday = false;
+  const [y,m,d] = e.target.value.split('-').map(Number);
+  currentDate = D(y,m,d);
+  renderDay();
+});
+
+/* ================= Backup / restore / history / copy ================= */
+document.getElementById('exportBtn').addEventListener('click', async ()=>{
+  try{
+    const keys = await storeListKeys('day:');
+    const out = {};
+    for(const k of keys){ const raw = await storeGetRaw(k); if(raw) out[k]=JSON.parse(raw); }
+    const profile = await getProfile();
+    const payload = {profile, days:out, exportedAt:new Date().toISOString()};
+    const blob = new Blob([JSON.stringify(payload,null,2)], {type:'application/json'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    const namePart = profile && profile.name ? profile.name.replace(/[^a-z0-9]/gi,'') : 'user';
+    a.href = url; a.download = `mission2027_${namePart}_backup_${fmt(new Date())}.json`;
+    document.body.appendChild(a); a.click(); a.remove();
+    URL.revokeObjectURL(url);
+  }catch(e){ alert('Backup failed: '+e.message); }
+});
+
+document.getElementById('importFile').addEventListener('change', async (e)=>{
+  const file = e.target.files[0];
+  if(!file) return;
+  try{
+    const text = await file.text();
+    const parsed = JSON.parse(text);
+    const days = parsed.days ? parsed.days : parsed;
+    for(const k in days){ await storeSetRaw(k, JSON.stringify(days[k])); }
+    if(parsed.profile){ await saveProfile(parsed.profile); applyProfileToUI(parsed.profile); }
+    alert('Backup restored. Reloading current day…');
+    renderDay();
+  }catch(err){ alert('Restore failed: '+err.message); }
+  e.target.value = '';
+});
+
+document.getElementById('historyBtn').addEventListener('click', async ()=>{
+  const panel = document.getElementById('historyList');
+  if(panel.style.display==='block'){ panel.style.display='none'; return; }
+  panel.style.display='block';
+  panel.innerHTML = '<div class="loading">Loading history…</div>';
+  try{
+    const keys = await storeListKeys('day:');
+    if(keys.length===0){ panel.innerHTML='<div class="loading">No ticks logged yet.</div>'; return; }
+    const rows = [];
+    for(const k of keys){
+      const raw = await storeGetRaw(k);
+      let arr = [];
+      try{ const p = JSON.parse(raw); arr = Array.isArray(p) ? p : (p.tasks||[]); }catch(e){}
+      const done = arr.filter(Boolean).length;
+      rows.push({date:k.replace('day:',''), done, total:arr.length});
+    }
+    panel.innerHTML = rows.map(r=>`<div class="hrow"><span class="hp mono">${r.date}</span><span>${r.done}/${r.total} tasks</span></div>`).join('');
+  }catch(e){ panel.innerHTML = '<div class="loading">History unavailable.</div>'; }
+});
+
+document.getElementById('copyTodayBtn').addEventListener('click', async ()=>{
+  const {combined, data} = await getDayView(currentDate);
+  const lines = combined.map((b,i)=>`${data.tasks[i]?'[x]':'[ ]'} ${b.time} — ${b.desc.replace(/<[^>]+>/g,'')}`);
+  const text = `${longDate(currentDate)}\n${lines.join('\n')}`;
+  try{
+    await navigator.clipboard.writeText(text);
+    showToast('Copied today\'s plan to clipboard.');
+  }catch(e){
+    prompt('Copy manually:', text);
+  }
+});
+
+/* ================= Init ================= */
+let appBooted = false;
+async function initAppAfterAuth(){
+  updateOnlineStatus();
+  renderCounters();
+  renderTestTable();
+  renderDay();
+  if(!appBooted){
+    appBooted = true;
+    setInterval(renderCounters, 60000);
+    setInterval(()=>{
+      if(!followingToday) return;
+      const t = localMidnightUTC();
+      if(fmt(t)!==fmt(currentDate) && t>=SCHEDULE_START && t<=UPPSC_PRELIMS){ currentDate = t; renderDay(); }
+    }, 30000);
+  }
+  if(FIREBASE_ENABLED) await cloudRestoreIfEmpty();
+}
+document.getElementById('cloudSyncBtn').addEventListener('click', async ()=>{
+  if(!FIREBASE_ENABLED){ showToast('Cloud backup is not set up yet — add your Firebase config first.'); return; }
+  await cloudSyncAll();
+  showToast('Synced to cloud.');
+});
+document.getElementById('cloudRestoreBtn').addEventListener('click', cloudRestoreForce);
+
+(function boot(){
+  if(FIREBASE_ENABLED && fbAuth){
+    fbAuth.onAuthStateChanged(async (user)=>{
+      if(user){
+        let p = await getProfile();
+        if(!p || p.email !== user.email){
+          p = {name:(p&&p.name)||'Professor', email:user.email, createdAt:new Date().toISOString()};
+          await saveProfile(p);
+        }
+        document.getElementById('loginOverlay').classList.add('hidden');
+        applyProfileToUI(p);
+        initAppAfterAuth();
+      } else {
+        showFirebaseAuthOverlay();
+      }
+    });
+  } else {
+    (async ()=>{
+      const p = await getProfile();
+      if(!p){ showOverlay('setup'); }
+      else if(p.pin){ showOverlay('unlock', p); }
+      else { document.getElementById('loginOverlay').classList.add('hidden'); applyProfileToUI(p); initAppAfterAuth(); }
+    })();
+  }
+})();
+</script>
+</body>
+</html>
