@@ -1,0 +1,1414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#FBF3F6">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="icon" href="icon-192.png">
+<title>UPPSC 2027 · Anuradha's Study Space</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Quicksand:wght@400;500;600;700&family=Nunito:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --blush:#F6D8DE;
+    --blush-deep:#E8AFC0;
+    --lav:#E6E1F5;
+    --lav-deep:#C9BEEA;
+    --cream:#FBF6F0;
+    --sage:#CFE3D4;
+    --sage-deep:#8FBBA0;
+    --ink:#4A3F45;
+    --ink-soft:#8B7C84;
+    --gold:#E3B655;
+    --white:#FFFEFC;
+    --line:#EFE2E7;
+    --shadow: 0 6px 24px rgba(180,140,160,0.14);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  html{scroll-behavior:smooth;}
+  a,button,.task,.card,.seal,.mini-cal .cell,.mood-row button,.backlog-item,.navbar button{transition:transform .18s ease, box-shadow .18s ease, background-color .25s ease, opacity .25s ease;}
+  button:active,.gate-btn:active{transform:scale(0.96);}
+  .task:active{transform:scale(0.99);}
+  #app.fade-swap{animation:fadeUp .32s ease both;}
+  body{
+    background:
+      radial-gradient(circle at 15% 0%, var(--lav) 0%, transparent 45%),
+      radial-gradient(circle at 90% 10%, var(--blush) 0%, transparent 40%),
+      linear-gradient(180deg, var(--cream), #FDFAF6 60%, var(--cream));
+    min-height:100vh;
+    font-family:'Nunito', sans-serif;
+    color:var(--ink);
+    padding-bottom:50px;
+  }
+  .wrap{max-width:720px;margin:0 auto;padding:16px 14px 30px;}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(10px);} to{opacity:1;transform:translateY(0);}}
+  @keyframes pop{0%{transform:scale(0.7);opacity:0;} 60%{transform:scale(1.08);opacity:1;} 100%{transform:scale(1);}}
+  @keyframes float{0%,100%{transform:translateY(0);} 50%{transform:translateY(-4px);}}
+  @keyframes shimmer{0%{background-position:-200px 0;} 100%{background-position:200px 0;}}
+  @keyframes burstFly{0%{transform:translate(0,0) scale(1);opacity:1;} 100%{transform:translate(var(--tx),var(--ty)) scale(0.4);opacity:0;}}
+  .fade-in{animation:fadeUp .5s ease both;}
+
+  /* ===== PIN GATE ===== */
+  #gate{
+    position:fixed;inset:0;z-index:50;
+    background:linear-gradient(160deg, var(--lav), var(--blush));
+    display:flex;align-items:center;justify-content:center;padding:20px;
+  }
+  .gate-card{
+    background:var(--white);border-radius:22px;box-shadow:var(--shadow);
+    padding:30px 26px;max-width:340px;width:100%;text-align:center;
+    animation:pop .45s ease both;
+  }
+  .gate-card .gicon{font-size:34px;animation:float 3s ease-in-out infinite;}
+  .gate-card h2{font-family:'Cormorant Garamond',serif;font-size:24px;margin:8px 0 2px;color:var(--ink);}
+  .gate-card p{font-size:12.5px;color:var(--ink-soft);margin:0 0 16px;}
+  .pin-dots{display:flex;gap:10px;justify-content:center;margin:14px 0;}
+  .pin-input{
+    width:100%;text-align:center;letter-spacing:14px;font-size:22px;
+    border:1.5px solid var(--line);border-radius:12px;padding:12px 10px;
+    font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--ink);
+  }
+  .gate-btn{
+    width:100%;margin-top:12px;background:linear-gradient(135deg,var(--blush-deep),var(--lav-deep));
+    color:var(--white);border:none;border-radius:12px;padding:12px;font-size:14.5px;font-weight:700;
+    cursor:pointer;font-family:'Quicksand',sans-serif;letter-spacing:0.3px;
+  }
+  .gate-btn:active{transform:scale(0.98);}
+  .gate-err{color:#C2607A;font-size:12px;margin-top:8px;min-height:16px;}
+  .gate-link{display:block;margin-top:14px;font-size:11.5px;color:var(--ink-soft);text-decoration:underline;cursor:pointer;background:none;border:none;}
+
+  /* ===== PROFILE HEADER ===== */
+  .credit{
+    text-align:center;font-family:'Quicksand',sans-serif;font-size:14px;letter-spacing:3.5px;
+    text-transform:uppercase;color:#B23A5C;font-weight:700;margin-bottom:4px;
+  }
+  .profile-card{
+    display:flex;align-items:center;gap:12px;background:var(--white);
+    border-radius:20px;padding:12px 16px;box-shadow:var(--shadow);margin-bottom:14px;
+  }
+  .avatar{
+    width:80px;height:80px;border-radius:50%;object-fit:cover;
+    border:4px solid var(--blush);flex-shrink:0;
+  }
+  .profile-name{font-family:'Cormorant Garamond',serif;font-size:21px;color:var(--ink);font-weight:600;}
+  .profile-sub{font-size:11.5px;color:var(--ink-soft);margin-top:1px;}
+
+  /* ===== Countdown seals ===== */
+  .seal-row{display:flex;gap:10px;margin-bottom:14px;}
+  .seal{
+    flex:1;background:var(--white);border-radius:16px;padding:12px 6px;text-align:center;
+    box-shadow:var(--shadow);
+  }
+  .seal .num{font-family:'Cormorant Garamond',serif;font-size:24px;font-weight:700;color:var(--blush-deep);}
+  .seal .lbl{font-size:9.5px;color:var(--ink-soft);text-transform:uppercase;letter-spacing:1px;margin-top:2px;}
+
+  /* ===== Nav ===== */
+  .navbar{
+    display:flex;align-items:center;gap:8px;background:var(--white);
+    border-radius:16px;padding:8px 10px;margin-bottom:12px;box-shadow:var(--shadow);
+  }
+  .navbar button{
+    background:var(--lav);color:var(--ink);border:none;border-radius:10px;
+    padding:9px 13px;font-size:15px;cursor:pointer;font-family:'Quicksand',sans-serif;
+  }
+  .navbar .today-btn{background:var(--sage-deep);color:var(--white);font-weight:700;font-size:12px;}
+  .navbar .datepick{
+    flex:1;text-align:center;font-family:'Cormorant Garamond',serif;font-weight:600;font-size:16px;
+    color:var(--ink);cursor:pointer;line-height:1.2;
+  }
+  .navbar .datepick .dow{font-size:9.5px;font-family:'Quicksand',sans-serif;color:var(--ink-soft);letter-spacing:1.5px;text-transform:uppercase;}
+  input[type=date]{
+    width:100%;margin-top:6px;border:1px solid var(--line);border-radius:8px;padding:6px;
+    font-family:'Quicksand',sans-serif;font-size:12.5px;background:var(--white);
+  }
+  .mini-cal{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-top:8px;}
+  .mini-cal .cell{
+    aspect-ratio:1;display:flex;align-items:center;justify-content:center;border-radius:8px;
+    font-size:11px;font-family:'Quicksand',sans-serif;border:1px solid var(--line);cursor:pointer;background:var(--cream);
+  }
+  .mini-cal .cell.blank{border:none;cursor:default;background:none;}
+  .mini-cal .cell.today{border:2px solid var(--gold);font-weight:700;}
+  .mini-cal .cell.sel{background:var(--blush-deep);color:white;}
+  .mini-cal .dow-h{font-size:9px;text-align:center;color:var(--ink-soft);font-family:'Quicksand',sans-serif;}
+
+  /* ===== Banners ===== */
+  .banner{
+    border-radius:16px;padding:11px 15px;margin-bottom:12px;font-size:12.5px;
+    display:flex;align-items:center;gap:8px;font-family:'Quicksand',sans-serif;font-weight:600;
+  }
+  .banner.study{background:var(--lav);color:#5B4E86;}
+  .banner.exam{background:linear-gradient(135deg,var(--gold),#F0CD84);color:#6b4c14;}
+  .banner.rest{background:var(--sage);color:#356048;}
+
+  /* ===== Progress ===== */
+  .progress-wrap{margin-bottom:14px;}
+  .progress-track{background:var(--line);border-radius:20px;height:11px;overflow:hidden;}
+  .progress-fill{background:linear-gradient(90deg,var(--blush-deep),var(--lav-deep));height:100%;border-radius:20px;transition:width .4s ease;}
+  .progress-label{font-size:11px;color:var(--ink-soft);text-align:right;margin-top:4px;}
+
+  /* ===== Quote ===== */
+  .quote-card{
+    background:linear-gradient(135deg,var(--blush),var(--lav));border-radius:18px;padding:14px 18px;
+    text-align:center;margin-bottom:14px;box-shadow:var(--shadow);
+  }
+  .quote-card .qtext{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:15.5px;color:#5B4A5E;}
+
+  /* ===== Section titles ===== */
+  .section-title{
+    font-family:'Quicksand',sans-serif;font-size:11px;letter-spacing:2.5px;text-transform:uppercase;
+    color:var(--blush-deep);margin:18px 4px 8px;font-weight:700;
+  }
+
+  /* ===== Tasks ===== */
+  .task{
+    display:flex;gap:10px;align-items:flex-start;background:var(--white);
+    border-radius:14px;padding:11px 13px;margin-bottom:9px;box-shadow:var(--shadow);
+    transition:transform .15s ease;
+    border-left:4px solid var(--lav-deep);
+    position:relative;overflow:visible;
+  }
+  .task.done{border-left-color:var(--sage-deep);background:#F8FBF9;}
+  .task.done .task-label{text-decoration:line-through;color:#a89ba1;}
+  .task.plain{border-left-color:var(--gold);background:#FFFAF0;}
+  .task.plain .task-time{color:#9c7a29;}
+  .task input[type=checkbox]{
+    width:22px;height:22px;flex-shrink:0;margin-top:1px;accent-color:var(--sage-deep);cursor:pointer;
+  }
+  .task-body{flex:1;}
+  .task-time{font-family:'Quicksand',sans-serif;font-size:11px;font-weight:700;color:var(--blush-deep);letter-spacing:0.2px;}
+  .task-label{font-size:14px;margin-top:2px;line-height:1.35;}
+  .task-note{font-size:11px;color:var(--ink-soft);margin-top:3px;font-style:italic;}
+
+  .burst{position:absolute;right:14px;top:6px;font-size:16px;pointer-events:none;}
+
+  #celebrate-toast{
+    position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(20px);
+    background:var(--white);border-radius:16px;box-shadow:var(--shadow);
+    padding:12px 20px;text-align:center;max-width:88%;opacity:0;transition:all .35s ease;z-index:60;
+  }
+  #celebrate-toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+  #celebrate-toast .ctext{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:14px;color:#5B4A5E;}
+  #celebrate-toast .cemoji{font-size:20px;}
+
+  /* ===== Overview ===== */
+  .overview-track{margin-bottom:10px;}
+  .overview-track h4{
+    font-family:'Cormorant Garamond',serif;font-size:15px;margin:0 0 6px;color:var(--ink);
+  }
+  .ov-item{
+    display:flex;justify-content:space-between;align-items:center;background:var(--cream);
+    border-radius:10px;padding:7px 12px;margin-bottom:5px;font-size:12px;
+  }
+  .ov-item .ov-name{font-weight:700;color:var(--ink);}
+  .ov-item .ov-dates{color:var(--ink-soft);font-size:11px;}
+
+  .card{background:var(--white);border-radius:18px;padding:14px 16px;margin-bottom:12px;box-shadow:var(--shadow);}
+  .card h3{font-family:'Cormorant Garamond',serif;font-size:16px;margin:0 0 8px;color:var(--ink);}
+  .tip-list{margin:0;padding-left:18px;font-size:12.5px;line-height:1.65;color:#5c5058;}
+
+  details summary{cursor:pointer;font-family:'Quicksand',sans-serif;font-size:11.5px;color:var(--blush-deep);letter-spacing:0.4px;font-weight:600;}
+  details[open] summary{margin-bottom:8px;}
+
+  .backup-row{display:flex;gap:8px;flex-wrap:wrap;}
+  .backup-row button{
+    flex:1;min-width:130px;background:var(--lav-deep);color:white;border:none;border-radius:12px;
+    padding:10px;font-family:'Quicksand',sans-serif;font-size:12.5px;cursor:pointer;font-weight:700;
+  }
+  .backup-row button.alt{background:var(--blush-deep);}
+  textarea{width:100%;min-height:80px;font-family:'Quicksand',sans-serif;font-size:11px;border:1px solid var(--line);border-radius:8px;padding:8px;}
+
+  #sync-pill{
+    position:fixed;top:10px;right:10px;background:var(--white);border-radius:20px;padding:4px 10px;
+    font-size:10px;color:var(--sage-deep);box-shadow:var(--shadow);font-family:'Quicksand',sans-serif;font-weight:700;
+    display:flex;align-items:center;gap:5px;z-index:40;
+  }
+  #sync-pill .dot{width:7px;height:7px;border-radius:50%;background:var(--sage-deep);}
+
+  footer{text-align:center;font-size:13px;color:var(--ink);margin-top:22px;font-family:'Quicksand',sans-serif;font-weight:600;letter-spacing:0.3px;}
+  footer .fbrand{color:#B23A5C;font-weight:700;}
+
+  /* ===== Backlog ===== */
+  .backlog-item{
+    display:flex;align-items:center;gap:8px;background:var(--cream);
+    border-radius:10px;padding:8px 10px;margin-bottom:6px;
+  }
+  .backlog-item input[type=checkbox]{width:18px;height:18px;accent-color:var(--sage-deep);flex-shrink:0;cursor:pointer;}
+  .backlog-item span{flex:1;font-size:12.5px;}
+  .backlog-item.done span{text-decoration:line-through;color:#a89ba1;}
+  .backlog-item button{background:none;border:none;color:var(--blush-deep);font-size:14px;cursor:pointer;padding:2px 4px;}
+  .backlog-add{display:flex;gap:6px;margin-top:8px;}
+  .backlog-add input{flex:1;border:1px solid var(--line);border-radius:10px;padding:8px 10px;font-family:'Quicksand',sans-serif;font-size:12.5px;}
+  .backlog-add button{background:var(--sage-deep);color:white;border:none;border-radius:10px;padding:8px 12px;font-size:13px;cursor:pointer;font-weight:700;}
+
+  /* ===== Weekly AI Report ===== */
+  .wk-row{display:flex;align-items:center;gap:8px;margin-bottom:6px;}
+  .wk-day{width:36px;font-size:10.5px;color:var(--ink-soft);font-family:'Quicksand',sans-serif;}
+  .wk-track{flex:1;background:var(--line);border-radius:10px;height:9px;overflow:hidden;}
+  .wk-fill{height:100%;background:linear-gradient(90deg,var(--sage-deep),var(--blush-deep));border-radius:10px;}
+  .wk-pct{width:36px;text-align:right;font-size:10.5px;color:var(--ink-soft);}
+  .wk-insight{background:var(--lav);border-radius:12px;padding:10px 12px;margin-top:8px;font-size:12.5px;color:#5B4E86;font-weight:600;}
+
+  /* ===== Wellness / Girls-focused features ===== */
+  .well-row{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px;}
+  .well-label{font-size:12.5px;font-weight:700;color:var(--ink);}
+  .counter{display:flex;align-items:center;gap:10px;}
+  .counter button{width:28px;height:28px;border-radius:50%;border:none;background:var(--lav-deep);color:white;font-size:16px;cursor:pointer;}
+  .counter .cval{font-family:'Cormorant Garamond',serif;font-size:18px;min-width:20px;text-align:center;}
+  .mood-row{display:flex;gap:6px;flex-wrap:wrap;}
+  .mood-row button{font-size:20px;background:var(--cream);border:2px solid transparent;border-radius:10px;padding:5px 8px;cursor:pointer;}
+  .mood-row button.sel{border-color:var(--blush-deep);background:var(--blush);}
+  .sleep-input{width:60px;border:1px solid var(--line);border-radius:8px;padding:6px;font-family:'Quicksand',sans-serif;text-align:center;}
+  .health-btn{width:100%;background:linear-gradient(135deg,var(--sage-deep),var(--sage));color:white;border:none;border-radius:12px;padding:10px;font-weight:700;cursor:pointer;font-family:'Quicksand',sans-serif;font-size:12.5px;margin-top:4px;}
+  .achiever-card{background:linear-gradient(135deg,var(--blush),var(--lav));border-radius:14px;padding:12px 14px;}
+  .achiever-card .a-name{font-family:'Cormorant Garamond',serif;font-size:16px;font-weight:700;color:#5B4A5E;}
+  .achiever-card .a-fact{font-size:12px;color:#5c5058;margin-top:3px;}
+  .wa-btn{display:inline-flex;align-items:center;gap:8px;background:#25D366;color:white;border:none;border-radius:12px;padding:11px 16px;font-weight:700;font-size:13px;cursor:pointer;text-decoration:none;font-family:'Quicksand',sans-serif;}
+
+  /* ===== Streak / Strict Mode ===== */
+  .streak-row{display:flex;gap:10px;}
+  .streak-box{flex:1;background:linear-gradient(135deg,var(--gold),#F3D9A0);border-radius:14px;padding:12px;text-align:center;}
+  .streak-box .snum{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:700;color:#6b4c14;}
+  .streak-box .slbl{font-size:10px;color:#7a5a1c;text-transform:uppercase;letter-spacing:1px;margin-top:2px;}
+  .strict-banner{background:linear-gradient(135deg,#F6D8DE,#E6E1F5);border-left:4px solid #B23A5C;border-radius:12px;padding:10px 12px;font-size:12px;color:#5B4A5E;margin-top:8px;font-weight:600;}
+
+  /* ===== Revision reminders ===== */
+  .rev-item{display:flex;gap:10px;align-items:flex-start;background:var(--cream);border-radius:12px;padding:9px 12px;margin-bottom:7px;}
+  .rev-tag{font-family:'Quicksand',sans-serif;font-size:10px;font-weight:700;color:var(--sage-deep);text-transform:uppercase;letter-spacing:0.5px;}
+  .rev-item .rt{flex:1;}
+  .rev-item .rt-topic{font-size:12.5px;margin-top:2px;}
+  .rev-item input[type=checkbox]{width:20px;height:20px;accent-color:var(--sage-deep);cursor:pointer;flex-shrink:0;margin-top:2px;}
+
+  /* ===== To-Do list ===== */
+  .todo-item{display:flex;align-items:center;gap:8px;background:var(--cream);border-radius:10px;padding:8px 10px;margin-bottom:6px;}
+  .todo-item input[type=checkbox]{width:18px;height:18px;accent-color:var(--lav-deep);flex-shrink:0;cursor:pointer;}
+  .todo-item span{flex:1;font-size:12.5px;}
+  .todo-item.done span{text-decoration:line-through;color:#a89ba1;}
+  .todo-item button{background:none;border:none;color:var(--blush-deep);font-size:14px;cursor:pointer;padding:2px 4px;}
+  .todo-add{display:flex;gap:6px;margin-top:8px;}
+  .todo-add input{flex:1;border:1px solid var(--line);border-radius:10px;padding:8px 10px;font-family:'Quicksand',sans-serif;font-size:12.5px;}
+  .todo-add button{background:var(--lav-deep);color:white;border:none;border-radius:10px;padding:8px 12px;font-size:13px;cursor:pointer;font-weight:700;}
+
+  /* ===== Daily Review (mood + reflection) ===== */
+  .review-mood-row{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;}
+  .rating-row{display:flex;gap:6px;margin-bottom:10px;}
+  .rating-row button{flex:1;background:var(--cream);border:2px solid transparent;border-radius:10px;padding:8px 0;font-size:16px;cursor:pointer;}
+  .rating-row button.sel{border-color:var(--sage-deep);background:var(--sage);}
+  .review-note{width:100%;min-height:60px;font-family:'Quicksand',sans-serif;font-size:12.5px;border:1px solid var(--line);border-radius:10px;padding:8px;}
+
+  /* ===== Sleep mandatory note ===== */
+  .sleep-warn{background:linear-gradient(135deg,var(--lav),var(--blush));border-radius:12px;padding:9px 12px;font-size:11.5px;color:#5B4A5E;margin-top:6px;font-weight:600;}
+
+  /* ===== Ask Professor (AI Q&A) ===== */
+  .ask-input-row{display:flex;gap:6px;margin-bottom:8px;}
+  .ask-input-row input{flex:1;border:1px solid var(--line);border-radius:10px;padding:9px 11px;font-family:'Quicksand',sans-serif;font-size:12.5px;}
+  .ask-input-row button{background:var(--blush-deep);color:white;border:none;border-radius:10px;padding:9px 14px;font-size:13px;cursor:pointer;font-weight:700;}
+  .ask-chip{display:inline-block;background:var(--cream);border-radius:20px;padding:5px 11px;font-size:11px;margin:2px 4px 2px 0;cursor:pointer;color:#5c5058;font-family:'Quicksand',sans-serif;}
+  .ask-answer{background:var(--lav);border-radius:12px;padding:11px 13px;margin-top:8px;font-size:12.5px;color:#4a3f45;line-height:1.55;}
+  .ask-answer .ask-q{font-weight:700;color:#5B4E86;margin-bottom:4px;}
+
+  /* ===== Install App ===== */
+  .install-btn{width:100%;background:linear-gradient(135deg,var(--lav-deep),var(--blush-deep));color:white;border:none;border-radius:12px;padding:11px;font-weight:700;cursor:pointer;font-family:'Quicksand',sans-serif;font-size:12.5px;margin-top:6px;}
+</style>
+</head>
+<body>
+
+<div id="sync-pill"><span class="dot"></span><span id="sync-text">saved</span></div>
+
+<div id="gate">
+  <div class="gate-card" id="gateCard"></div>
+</div>
+
+<div class="wrap" id="app" style="display:none;">Loading…</div>
+<div id="celebrate-toast"></div>
+
+<script>
+/* =========================================================
+   DATA MODEL — UPPSC 2027 (Anuradha)
+========================================================= */
+const TODAY = new Date(); TODAY.setHours(0,0,0,0);
+function d(s){ const [y,m,day]=s.split('-').map(Number); const dt=new Date(y,m-1,day); dt.setHours(0,0,0,0); return dt; }
+function ds(dt){ return dt.getFullYear()+'-'+String(dt.getMonth()+1).padStart(2,'0')+'-'+String(dt.getDate()).padStart(2,'0'); }
+function addDays(dt,n){ const r=new Date(dt); r.setDate(r.getDate()+n); r.setHours(0,0,0,0); return r; }
+function diffDays(a,b){ return Math.round((b-a)/86400000); }
+const DOW = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+const MON = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+const PLAN_START   = d('2026-07-05');
+const PRELIMS_EXAM = d('2026-12-06');
+const PLAN_VIEW_END = d('2027-07-05'); // generation supports well beyond this too
+
+/* ---- Coaching track windows ---- */
+const COACH_WINDOWS = [
+  {start:'2026-07-05', end:'2026-08-18', tag:'Geography'},
+  {start:'2026-08-19', end:'2026-09-27', tag:'Economics'},
+  {start:'2026-09-28', end:'2026-11-04', tag:'Polity'},
+  {start:'2026-11-05', end:'2026-12-05', tag:'Buffer / Revision (Prelims Mocks)'},
+  {start:'2026-12-10', end:'2099-12-31', tag:'Ethics (Mains)'}
+];
+/* ---- Self-study track windows ---- */
+const SELF_WINDOWS = [
+  {start:'2026-07-05', end:'2026-07-23', tag:'Ancient History'},
+  {start:'2026-07-24', end:'2026-08-08', tag:'Medieval History'},
+  {start:'2026-08-09', end:'2026-08-30', tag:'Modern History'},
+  {start:'2026-08-31', end:'2026-09-27', tag:'Science & Technology'},
+  {start:'2026-09-28', end:'2026-10-31', tag:'UP Special'},
+  {start:'2026-11-01', end:'2026-12-05', tag:'Buffer / Revision (Prelims Mocks)'},
+  {start:'2026-12-10', end:'2099-12-31', tag:'Mains Foundation Revision'}
+];
+
+function findWindow(list, dt){
+  const s = ds(dt);
+  for(const w of list){ if(s>=w.start && s<=w.end) return w; }
+  return null;
+}
+function pick(pool, dt, anchor, stride){
+  stride = stride||1;
+  const idx = diffDays(anchor, dt)*stride;
+  const n = pool.length;
+  return pool[((idx%n)+n)%n];
+}
+function pick2(pool, dt, anchor){
+  const n = pool.length;
+  const base = diffDays(anchor, dt)*2;
+  const i1 = ((base%n)+n)%n;
+  const i2 = ((base+1)%n+n)%n;
+  return [pool[i1], pool[i2]];
+}
+
+/* ---- Topic pools (built from Prelims + Mains GS1/2/3/5/6 syllabus provided) ---- */
+const GEO_TOPICS = [
+"Physical Geography of India & World — overview",
+"Social Geography — population distribution & patterns",
+"Economic Geography — resource-based industries & trade",
+"Earthquakes — causes, distribution & zones (India focus)",
+"Tsunami — mechanism & Indian Ocean context",
+"Volcanic activity — types & world distribution",
+"Cyclones — tropical cyclones & Indian coast vulnerability",
+"Ocean currents — major world currents",
+"Winds — planetary winds & monsoon winds",
+"Glaciers — formation, Himalayan glaciers & climate change link",
+"Distribution of natural resources — water, soils, forests (South/SE Asia & India)",
+"Location factors of industries",
+"Oceanic resources of India & their potential",
+"Human migration & the refugee problem — world and India",
+"Frontiers & boundaries — Indian sub-continent context",
+"Population & settlements — types & patterns",
+"Urbanisation — Smart Cities & Smart Villages",
+"Current affairs linked to Geography",
+"Revision & PYQs — Physical Geography",
+"Revision & PYQs — Economic & Social Geography"
+];
+const ECO_TOPICS = [
+"Economic Planning in India — NITI Aayog's role",
+"Sustainable Development Goals (SDGs)",
+"Poverty, unemployment & inclusive growth",
+"Social justice & economic development linkages",
+"Government Budget — components & financial system",
+"Major crops & cropping patterns",
+"Irrigation systems in India",
+"Storage, transport & agricultural marketing",
+"e-technology in farming",
+"Farm subsidies (direct/indirect) & Minimum Support Price",
+"Public Distribution System — objectives, functioning, revamping",
+"Buffer stocks & food security; Technology Missions in agriculture",
+"Food processing — scope, significance & supply chain",
+"Land reforms in India post-Independence",
+"Industrial Policy — impact of LPG on industrial growth",
+"Infrastructure — Energy",
+"Infrastructure — Ports, Roads, Airports, Railways",
+"Sustainable development, demographics & social sector initiatives",
+"Revision & PYQs — Economy (round 1)",
+"Revision & PYQs — Economy (round 2)"
+];
+const POL_TOPICS = [
+"Indian Constitution — historical underpinnings & evolution",
+"Constitution — features, amendments & basic structure",
+"Federal structure — Union & State functions/responsibilities",
+"Federal issues — devolution of powers & finances to local levels",
+"Finance Commission — role in Centre–State relations",
+"Separation of powers — dispute redressal & ADR",
+"Comparison — Indian Constitution vs other democracies",
+"Parliament & State Legislatures — structure & functioning",
+"Executive & Judiciary — Ministries, Departments, PIL",
+"Pressure groups & formal/informal associations",
+"Representation of the People's Act — salient features",
+"Constitutional posts — appointment, powers, functions",
+"Statutory & quasi-judicial bodies (incl. NITI Aayog)",
+"Government policies — design, implementation & role of ICT",
+"Development processes — NGOs, SHGs, donors & stakeholders",
+"Welfare schemes for vulnerable sections",
+"Social sector — Health, Education, Human Resources",
+"Poverty & hunger — issues and impact",
+"Governance — transparency, accountability & e-governance",
+"Civil Services — role in a democracy (emerging trends)",
+"India & neighbourhood relations",
+"Global groupings — bilateral / regional / global agreements",
+"Global policies' effect on India & Indian diaspora",
+"International institutions — structure & mandate",
+"Revision & PYQs — Polity & Governance (round 1)",
+"Revision & PYQs — Polity & Governance (round 2)"
+];
+const ETHICS_TOPICS = [
+"Ethics & Human Interface — essence, determinants & consequences",
+"Ethics in private vs public relationships",
+"Human values — lessons from great leaders, reformers & administrators",
+"Role of family, society & education in inculcating values",
+"Attitude — content, structure & function",
+"Aptitude & foundational values — integrity, impartiality, objectivity",
+"Emotional Intelligence — concepts & application in governance",
+"Contributions of moral thinkers & philosophers",
+"Civil service values & ethics in public administration",
+"Laws, rules & conscience as sources of ethical guidance",
+"Accountability & ethical governance",
+"Probity in Governance — concept & philosophical basis",
+"RTI, Codes of Conduct & Citizens' Charters",
+"Corruption — challenges & remedies",
+"Case studies — administrative dilemmas",
+"Revision & PYQs — Ethics"
+];
+const ANCIENT_TOPICS = [
+"Pre-historic India & the Indus Valley Civilisation",
+"Vedic Age — society, polity & religion",
+"Rise of the Mahajanapadas",
+"Buddhism & Jainism — origin, spread & impact",
+"Mauryan Empire — administration & Ashoka",
+"Post-Mauryan period — Shungas, Kushanas, Satavahanas",
+"Gupta Age — polity, economy & culture",
+"Post-Gupta period & South Indian kingdoms (Cholas, Pandyas, Pallavas)",
+"Ancient Indian art forms",
+"Ancient Indian literature",
+"Ancient Indian architecture",
+"Revision & PYQs — Ancient History"
+];
+const MEDIEVAL_TOPICS = [
+"Early medieval India — regional kingdoms",
+"Delhi Sultanate — administration & society",
+"Vijayanagara & Bahmani kingdoms",
+"Mughal Empire — administration & polity",
+"Mughal decline & rise of regional powers",
+"Bhakti & Sufi movements",
+"Medieval Indian art & architecture",
+"Medieval Indian literature",
+"Revision & PYQs — Medieval History"
+];
+const MODERN_TOPICS = [
+"Advent of Europeans & British expansion (from 1757)",
+"British administrative & economic policies",
+"Socio-religious reform movements (19th century)",
+"Revolt of 1857 — causes & impact",
+"Rise of Indian nationalism — early phase (1885–1905)",
+"Partition of Bengal & the Swadeshi Movement",
+"Moderates, Extremists & the Home Rule Movement",
+"Gandhian era — Non-Cooperation Movement",
+"Civil Disobedience Movement & Round Table Conferences",
+"Quit India Movement & the INA",
+"Freedom struggle — contributions from different regions of India",
+"Partition & Independence (1947)",
+"Post-Independence consolidation — integration of princely states",
+"Post-Independence reorganisation of states (up to 1965)",
+"Modern Indian art, literature & architecture",
+"Revision & PYQs — Modern History (round 1)",
+"Revision & PYQs — Modern History (round 2)"
+];
+const SCITECH_TOPICS = [
+"General Science — everyday Physics",
+"General Science — everyday Chemistry",
+"General Science — everyday Biology",
+"S&T developments & India's S&T policy",
+"Indian achievements in S&T; indigenisation of technology",
+"Transfer of technology; dual-use & critical technologies",
+"Information & Communication Technology (ICT)",
+"Space technology — India's space programme",
+"Computers & digital technologies",
+"Energy technologies",
+"Nanotechnology",
+"Biotechnology & microbiology",
+"Intellectual Property Rights (IPR) & digital rights",
+"Environment — ecosystems, wildlife conservation & biodiversity",
+"Pollution, degradation & Environmental Impact Assessment (EIA)",
+"Disaster management — a non-traditional security challenge",
+"International security — nuclear proliferation, extremism, cyber security, money laundering, trafficking",
+"Internal security — terrorism, insurgency, organised crime, corruption",
+"Security forces — role, mandate & higher defence organisations",
+"Revision & PYQs — Science, Tech & Security (round 1)",
+"Revision & PYQs — Science, Tech & Security (round 2)"
+];
+const UP5_TOPICS = [
+"History & Culture of UP — architecture, antiquities, museums, archives",
+"UP in the Freedom Struggle — pre & post 1857",
+"Eminent personalities — UP's freedom fighters",
+"Society of UP — rural, urban & tribal issues",
+"UP society — festivals, fairs, music & folk dances",
+"UP society — literature, languages/dialects & social customs",
+"Political system of UP — Governor, CM, Council of Ministers",
+"Political system of UP — State Assembly, State Council, Centre–State relations",
+"UP administration — Public Service Commission, Auditing, Advocate General, High Court",
+"State-specific systems — selection criteria, official language, funds, parties, SEC",
+"Local self-government in UP — Panchayati Raj & Urban Local Bodies",
+"Governance in UP — good governance, corruption eradication, Lokayukta",
+"Governance in UP — Citizens' Charter, e-governance, RTI, grievance redressal",
+"Land reforms in UP — impacts",
+"Security in UP — extremism–development link, external/state actors",
+"Security in UP — cyber security, money laundering, human trafficking",
+"Law & order, health & education systems of UP; UP's contribution nationally; UP current affairs; Jal Shakti Mission & central schemes; NGOs, tourism & innovation in UP"
+];
+const UP6_TOPICS = [
+"UP economy — overview, State Budget, infrastructure & physical resources",
+"Trade, commerce & industries in UP",
+"UP government schemes — planned development, welfare, HR, skill development",
+"Investment in UP — issues & impacts",
+"Public finance & policy — tax reforms, economic reforms, ODOP Policy",
+"Energy in UP — renewable & non-renewable",
+"Demography — population & censuses of UP",
+"Agriculture in UP — commercialisation & crop production",
+"UP's new forest policy; agro & social forestry",
+"Agricultural diversity — problems & solutions in UP",
+"Developmental indices of UP",
+"Geography of UP — location, relief, structure & climate",
+"Geography of UP — irrigation, minerals, drainage & vegetation",
+"Environment in UP — National Parks & Wildlife Sanctuaries",
+"Transport network & power resources in UP",
+"Pollution in UP — issues & the Pollution Control Board",
+"Natural resources of UP — soil, water, air, forests, grasslands, wetlands",
+"Climate change — weather forecasting issues in UP",
+"Habitat & ecosystem — flora & fauna of UP",
+"Science & technology in UP — issues & advancements",
+"Allied agriculture in UP — aquaculture, viticulture, sericulture, floriculture, horticulture, forestry",
+"PPP Model — evolution in UP's development",
+"Revision & PYQs — UP Special"
+];
+const UP_SPECIAL_TOPICS = UP5_TOPICS.concat(UP6_TOPICS);
+const BUFFER_ROTATION = [
+  {tag:'Geography', pool:GEO_TOPICS}, {tag:'Economy', pool:ECO_TOPICS}, {tag:'Polity', pool:POL_TOPICS},
+  {tag:'Ancient History', pool:ANCIENT_TOPICS}, {tag:'Medieval History', pool:MEDIEVAL_TOPICS},
+  {tag:'Modern History', pool:MODERN_TOPICS}, {tag:'Science & Tech', pool:SCITECH_TOPICS},
+  {tag:'UP Special', pool:UP_SPECIAL_TOPICS}
+];
+const MAINS_FOUNDATION_ROTATION = BUFFER_ROTATION; // reused after Prelims for open-ended continuation
+
+function coachTopic(dt, win){
+  if(win.tag==='Geography') return pick(GEO_TOPICS, dt, d(win.start));
+  if(win.tag==='Economics') return pick(ECO_TOPICS, dt, d(win.start));
+  if(win.tag==='Polity') return pick(POL_TOPICS, dt, d(win.start));
+  if(win.tag==='Ethics (Mains)') return pick(ETHICS_TOPICS, dt, d(win.start));
+  if(win.tag.indexOf('Buffer')===0){
+    const rot = BUFFER_ROTATION[diffDays(PLAN_START,dt)%BUFFER_ROTATION.length];
+    return rot.tag+' — '+pick(rot.pool, dt, PLAN_START);
+  }
+  return null;
+}
+function selfTopics(dt, win){
+  if(win.tag==='Ancient History') return pick2(ANCIENT_TOPICS, dt, d(win.start));
+  if(win.tag==='Medieval History') return pick2(MEDIEVAL_TOPICS, dt, d(win.start));
+  if(win.tag==='Modern History') return pick2(MODERN_TOPICS, dt, d(win.start));
+  if(win.tag==='Science & Technology') return pick2(SCITECH_TOPICS, dt, d(win.start));
+  if(win.tag==='UP Special') return pick2(UP_SPECIAL_TOPICS, dt, d(win.start));
+  if(win.tag==='Mains Foundation Revision'){
+    const i1 = diffDays(PLAN_START,dt)%MAINS_FOUNDATION_ROTATION.length;
+    const i2 = (i1+1)%MAINS_FOUNDATION_ROTATION.length;
+    const rot1 = MAINS_FOUNDATION_ROTATION[i1], rot2 = MAINS_FOUNDATION_ROTATION[i2];
+    return [rot1.tag+' — '+pick(rot1.pool, dt, PLAN_START), rot2.tag+' — '+pick(rot2.pool, dt, PLAN_START)];
+  }
+  if(win.tag.indexOf('Buffer')===0){
+    const i1 = (diffDays(PLAN_START,dt)+3)%BUFFER_ROTATION.length;
+    const i2 = (i1+1)%BUFFER_ROTATION.length;
+    const rot1 = BUFFER_ROTATION[i1], rot2 = BUFFER_ROTATION[i2];
+    return [rot1.tag+' — '+pick(rot1.pool, dt, PLAN_START), rot2.tag+' — '+pick(rot2.pool, dt, PLAN_START)];
+  }
+  return [null,null];
+}
+
+/* ---- Overview data for display ---- */
+const OVERVIEW_COACH = [
+  {name:'Geography', dates:'5 Jul – 18 Aug'},
+  {name:'Economics', dates:'19 Aug – 27 Sep'},
+  {name:'Polity', dates:'28 Sep – 4 Nov'},
+  {name:'Buffer / Revision (Prelims Mocks)', dates:'5 Nov – 5 Dec'},
+  {name:'Ethics (Mains)', dates:'10 Dec onward'}
+];
+const OVERVIEW_SELF = [
+  {name:'Ancient History', dates:'5 Jul – 23 Jul'},
+  {name:'Medieval History', dates:'24 Jul – 8 Aug'},
+  {name:'Modern History', dates:'9 Aug – 30 Aug'},
+  {name:'Science & Technology', dates:'31 Aug – 27 Sep'},
+  {name:'UP Special (Mains + Prelims)', dates:'28 Sep – 31 Oct'},
+  {name:'Buffer / Revision (Prelims Mocks)', dates:'1 Nov – 5 Dec'},
+  {name:'Mains Foundation Revision', dates:'10 Dec onward'}
+];
+
+/* ---- Motivation (daily, shown once per day) ---- */
+const DAILY_LINES = [
+"Ek subject, ek din, ek kadam — yehi tumhara rank banata hai.",
+"Tumne shuru kiya hai, ab sirf consistent rehna hai. 🌸",
+"Aaj ka chhota effort, kal ki badi safalta.",
+"Har topic complete = ek naya confidence.",
+"Slow progress bhi progress hai — khud ko time do.",
+"Tumhari mehnat dikh rahi hai, bas isi tarah chalte raho.",
+"Prelims ka target clear hai — bas roz thoda thoda jodna hai.",
+"Aaj ka din tumhare UPPSC safar ka ek important din hai.",
+"Khud par bharosa rakho — tum kar sakti ho.",
+"Notes banate raho, revision khud aasan ho jayega."
+];
+/* ---- Celebration lines (shown on completing a task) ---- */
+const CELEBRATE_LINES = [
+{e:'🌸', t:'Beautifully done!'},
+{e:'✨', t:'One step closer to your goal.'},
+{e:'🎀', t:"That's the spirit!"},
+{e:'🌷', t:'Proud of this consistency.'},
+{e:'💫', t:'Small wins, big journey.'},
+{e:'🩷', t:'Keep this momentum going.'},
+{e:'🌼', t:'Well studied today!'},
+{e:'🦋', t:'Growth, one tick at a time.'}
+];
+/* ---- Women achievers spotlight (rotates daily, for motivation) ---- */
+const ACHIEVERS = [
+  {name:'Tina Dabi', fact:'Topped UPSC CSE 2015 (AIR 1) at age 22 — proof that a focused, consistent study routine beats everything else.'},
+  {name:'Anna Rajam Malhotra', fact:"India's first woman IAS officer (1951 batch) — she opened the door for every woman in the civil services after her."},
+  {name:'Kiran Bedi', fact:"India's first woman IPS officer, known for reform-focused, no-nonsense administration throughout her career."},
+  {name:'Ira Singhal', fact:'Topped UPSC CSE 2014 (AIR 1) after facing job denial earlier due to disability — resilience over setbacks.'},
+  {name:'Durga Shakti Nagpal', fact:'IAS officer known for taking a firm stand against illegal sand mining — integrity in public service.'},
+  {name:'Anu Kumari', fact:'Secured AIR 2 in UPSC CSE 2017 through steady, disciplined daily preparation.'},
+  {name:'Smita Sabharwal', fact:"IAS officer often called the 'People's Officer' for her grassroots, citizen-first governance style in Telangana."}
+];
+const TIPS = [
+"Use a single 'UP Special Facts' notebook for the daily 3:30–4:00 PM active-break revision.",
+"Keep one running Current Affairs notebook — revise it every Sunday evening.",
+"Note every PYQ mistake in one Error Log; revise that log in the last week before Prelims.",
+"Tag your notes by subject colour — makes the Buffer/Revision phase much faster to navigate."
+];
+/* ---- How to study longer / increase productivity ---- */
+const STUDY_LONGER_TIPS = [
+"Pomodoro tarike se padho — 50 min focused study + 10 min break, phone door rakho break ke time bhi.",
+"Har study block shuru karne se pehle 1 line likho ki is block mein exactly kya complete karna hai — vague padhai lambi nahi chalti.",
+"Sabse tough/boring subject ko din ke us time rakho jab energy sabse zyada ho (usually subah), easy revision wala kaam thake hue time pe.",
+"Phone ko dusre room mein rakh kar padho ya Do Not Disturb laga do — notifications hi sabse bada focus-breaker hain.",
+"Active recall use karo — sirf padhna nahi, book band karke khud se boliye/likhiye jo yaad hai, isse retention aur study stamina dono badhte hain.",
+"Har 90 min ke baad 5 min ka movement break lo (stretch/walk) — isse dimag fresh rehta hai aur agla block lamba chal pata hai.",
+"Study se pehle 2 min ka 'why' likho — aaj ka topic tumhare rank goal se kaise juda hai, motivation wapas aa jata hai.",
+"Ek hi jagah, ek hi setup mein roz padho — brain ko signal milta hai ki 'yeh study zone hai', focus jaldi aata hai.",
+"Diet halka aur hydrated raho — bhari khana neend laata hai aur study block chhota kar deta hai."
+];
+
+/* =========================================================
+   STORAGE HELPERS
+========================================================= */
+function setSync(state){
+  const el = document.getElementById('sync-text');
+  const pill = document.getElementById('sync-pill');
+  if(!el) return;
+  if(state==='saving'){ el.textContent='saving…'; pill.style.opacity='0.7'; }
+  else if(state==='ok'){ el.textContent='saved'; pill.style.opacity='1'; }
+  else { el.textContent='offline'; pill.style.opacity='0.5'; }
+}
+/* No backend/API — everything saves straight to this device's browser
+   storage (localStorage), so the planner works fully offline once hosted
+   on GitHub Pages. Every tick/tap auto-saves instantly. "Cloud Sync" below
+   is a manual Export/Import — download a backup file and keep it in your
+   own Google Drive / WhatsApp-to-self, then Import it on any other device
+   to carry your progress across phones/laptops. */
+const LS_PREFIX = 'anuradha_uppsc:';
+async function storeGet(key){
+  try{ return localStorage.getItem(LS_PREFIX+key); }catch(e){ return null; }
+}
+async function storeSet(key,val){
+  setSync('saving');
+  let ok=false;
+  try{ localStorage.setItem(LS_PREFIX+key, val); ok=true; }catch(e){ ok=false; }
+  setSync(ok?'ok':'err');
+  return ok;
+}
+async function storeDelete(key){
+  try{ localStorage.removeItem(LS_PREFIX+key); }catch(e){}
+}
+async function storeListPrefix(prefix){
+  const keys = new Set();
+  try{
+    for(let i=0;i<localStorage.length;i++){
+      const full = localStorage.key(i);
+      if(full && full.indexOf(LS_PREFIX+prefix)===0) keys.add(full.slice(LS_PREFIX.length));
+    }
+  }catch(e){}
+  return Array.from(keys);
+}
+async function getChecked(key){ const v = await storeGet('chk:'+key); return v==='1'; }
+async function setChecked(key,val){ await storeSet('chk:'+key, val?'1':'0'); }
+
+/* =========================================================
+   PIN GATE
+========================================================= */
+/* Fixed access credential — set by Professor. Only this PIN opens the
+   planner; there is no "create PIN" step and no "Forgot PIN" option. */
+const PROFESSOR_PIN = '2253';
+async function initGate(){
+  renderGate();
+}
+function renderGate(){
+  const card = document.getElementById('gateCard');
+  card.innerHTML = `
+    <div class="gicon">🌷</div>
+    <h2>Welcome back</h2>
+    <p>Enter your PIN to open your study space.</p>
+    <input class="pin-input" id="pinEnter" type="password" inputmode="numeric" maxlength="6" placeholder="••••">
+    <button class="gate-btn" onclick="checkPin()">Unlock</button>
+    <div class="gate-err" id="gateErr"></div>
+  `;
+  const inp = document.getElementById('pinEnter');
+  if(inp) inp.addEventListener('keydown', e=>{ if(e.key==='Enter') checkPin(); });
+}
+function checkPin(){
+  const val = document.getElementById('pinEnter').value.trim();
+  const err = document.getElementById('gateErr');
+  if(val===PROFESSOR_PIN){ unlockApp(); } else { err.textContent='Incorrect PIN, try again.'; }
+}
+function unlockApp(){
+  document.getElementById('gate').style.display='none';
+  document.getElementById('app').style.display='block';
+  render();
+}
+
+/* ---- Beginner-friendly guidance shown under self-study blocks, since
+   Anuradha is building this subject knowledge from scratch ---- */
+const SUBJECT_GUIDANCE = {
+  'Ancient History':'Timeline yaad rakhein (kaun se raja/period ke baad kaun aaya), important dynasties ke naam, aur unse judi art/culture ki basic facts — NCERT Class 11 se shuru karein.',
+  'Medieval History':'Sultanate aur Mughal period ka basic timeline, prashasnik (administrative) system, aur Bhakti-Sufi movements ke key points par focus karein.',
+  'Modern History':'1857 se 1947 tak ka movement-wise timeline banayein — kaun sa andolan kab hua, uske leader kaun the, aur uska outcome kya raha.',
+  'Science & Technology':'Roz-marra ke Science concepts ko simple bhasha mein samjhein, phir usse related current affairs (ISRO, naye discoveries) ko note karein.',
+  'UP Special':'Yeh UP-specific topic hai — pehle basic definition/background padhein, phir UP Board/Govt ki current schemes se link karein. Yeh Prelims aur Mains dono ke liye important hai.',
+  'Mains Foundation Revision':'Is round mein purane padhe topics ko dobara short notes se revise karein — naye facts add karne ke bajaye jo pehle se pata hai use pakka karein.',
+  'Buffer / Revision (Prelims Mocks)':'Yeh revision + mock-test phase hai — topic padhne ke bajaye PYQs aur apne notes dobara dekhein, mistakes ka error log banayein.'
+};
+function guidanceFor(tag){
+  return SUBJECT_GUIDANCE[tag] || 'Basic concept clearly samjhein, phir current affairs se link karke short notes banayein.';
+}
+
+/* =========================================================
+   BUILD DAY
+========================================================= */
+function buildDay(dt){
+  const dateStr = ds(dt);
+  const day = {date:dateStr, dow:dt.getDay(), dayNum: diffDays(PLAN_START,dt)+1, tasks:[], phase:null};
+
+  if(dt < PLAN_START){ day.phase='out'; return day; }
+
+  if(ds(dt)===ds(PRELIMS_EXAM)){ day.phase='exam'; return day; }
+  const gapStart = addDays(PRELIMS_EXAM,1), gapEnd = addDays(PRELIMS_EXAM,3);
+  if(dt>=gapStart && dt<=gapEnd){
+    day.phase='rest';
+    day.tasks.push({id:'rest1', time:'All Day', label:'Post-exam recovery — relax, light current affairs only', checkbox:true, plain:true});
+    return day;
+  }
+
+  day.phase='study';
+  const cWin = findWindow(COACH_WINDOWS, dt);
+  const sWin = findWindow(SELF_WINDOWS, dt);
+  const selfArr = sWin ? selfTopics(dt,sWin) : [null,null];
+  const selfTag = sWin ? sWin.tag : 'Self-Study';
+
+  day.coachTag = cWin ? cWin.tag : '';
+  day.selfTag = selfTag;
+
+  const isSunday = (dt.getDay()===0);
+
+  day.tasks.push({id:'d1', time:'12:00 – 6:30 AM', label:'Sleep', checkbox:false, plain:true,
+    note:'😴 Sleep is mandatory, isse skip mat karo — bina puri neend ke agle din focus, memory aur mood sab kharab ho jaate hain, aur padha hua bhi yaad nahi rehta. 7–8 ghante ki neend lo, chahe schedule kitna bhi tight kyun na ho.'});
+  day.tasks.push({id:'d2', time:'6:30 – 7:00 AM', label:'Wake up & shower', checkbox:false, plain:true});
+  day.tasks.push({id:'d3', time:'7:00 – 8:00 AM', label:'Breakfast & morning prep', checkbox:false, plain:true});
+  day.tasks.push({id:'d4', time:'8:00 – 11:00 AM', label:'Coaching Class — '+(cWin?cWin.tag:'General'), checkbox:true});
+  day.tasks.push({id:'d5', time:'11:00 AM – 1:00 PM', label:'Commute, rest & lunch', checkbox:false, plain:true});
+  day.tasks.push({id:'d6', time:'1:00 – 3:30 PM', label:'Self-Study Block 1 — '+selfTag+(selfArr[0]?(' — '+selfArr[0]):''), checkbox:true, note:guidanceFor(selfTag)});
+  day.tasks.push({id:'d7', time:'3:30 – 4:00 PM', label:'Active Break — UP Special Facts / quick PYQs', checkbox:true});
+  if(isSunday){
+    day.tasks.push({id:'d8', time:'4:00 – 6:10 PM', label:'Self-Study Block 2 — '+selfTag+(selfArr[1]?(' — '+selfArr[1]):''), checkbox:true, note:guidanceFor(selfTag)+' (Sunday: block 20 min chhota hai, evening break mein extra mil raha hai.)'});
+    day.tasks.push({id:'d9', time:'6:10 – 9:00 PM', label:'Evening break, current affairs & dinner — 🌸 Sunday bonus: 20 extra min relax time', checkbox:false, plain:true});
+  } else {
+    day.tasks.push({id:'d8', time:'4:00 – 6:30 PM', label:'Self-Study Block 2 — '+selfTag+(selfArr[1]?(' — '+selfArr[1]):''), checkbox:true, note:guidanceFor(selfTag)});
+    day.tasks.push({id:'d9', time:'6:30 – 9:00 PM', label:'Evening break, current affairs & dinner', checkbox:false, plain:true});
+  }
+  day.tasks.push({id:'d10', time:'9:00 – 11:30 PM', label:'Coaching Revision — '+(cWin?cWin.tag:'General'), checkbox:true});
+  day.isSunday = isSunday;
+  return day;
+}
+
+/* =========================================================
+   RENDER
+========================================================= */
+let selectedDate = TODAY < PLAN_START ? PLAN_START : TODAY;
+let calOpen = false;
+
+async function render(){
+  const app = document.getElementById('app');
+  const dt = selectedDate;
+  const day = buildDay(dt);
+  const daysToExam = diffDays(TODAY, PRELIMS_EXAM);
+
+  const isHealthDay = (await storeGet('healthday:'+day.date)) === '1';
+  const backlogList = await loadBacklog();
+  const todoList = await loadTodo();
+  const weeklyStats = await computeWeeklyStats();
+  const streak = await computeStreak();
+  const revItems = await computeRevisionReminders(dt);
+  const review = await getReview(day.date);
+
+  let html = '';
+
+  html += `<div class="credit fade-in">Professor</div>
+  <div class="profile-card fade-in">
+    <img class="avatar" src="data:image/jpeg;base64,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" alt="Anuradha">
+    <div>
+      <div class="profile-name">Anuradha Gupta</div>
+      <div class="profile-sub">UPPSC CSE 2027 · Study Space</div>
+    </div>
+  </div>`;
+
+  html += `<div class="seal-row fade-in">
+    <div class="seal"><div class="num">${day.dayNum>0?('Day '+day.dayNum):'–'}</div><div class="lbl">Study Day</div></div>
+    <div class="seal"><div class="num">${daysToExam>=0?('Day −'+daysToExam):'✓'}</div><div class="lbl">${daysToExam>=0?'Days to Prelims':'Prelims Done'}</div></div>
+  </div>`;
+
+  html += `<div class="navbar">
+    <button onclick="navDay(-1)">‹</button>
+    <div class="datepick" onclick="toggleCal()">
+      <div class="dow">${DOW[dt.getDay()]}</div>
+      <div>${dt.getDate()} ${MON[dt.getMonth()]} ${dt.getFullYear()}</div>
+    </div>
+    <button onclick="navDay(1)">›</button>
+    <button class="today-btn" onclick="goToday()">Today</button>
+  </div>`;
+
+  if(calOpen){ html += `<div class="card">${renderMiniCalendar(dt)}</div>`; }
+
+  if(day.phase==='study'){
+    html += `<div class="banner study">🌷 ${day.coachTag} <span style="opacity:.6">×</span> ${day.selfTag}${day.isSunday?' · 🌸 Sunday — 20 min extra evening break':''}</div>`;
+    if(isHealthDay){
+      html += `<div class="banner rest">💗 Health Day — take it easy today, tasks are optional. Apna khayal rakhein.</div>`;
+    }
+  } else if(day.phase==='exam'){
+    html += `<div class="banner exam">🎯 UPPSC Prelims Exam Day — you've got this, Anuradha!</div>`;
+  } else if(day.phase==='rest'){
+    html += `<div class="banner rest">🌿 Post-exam recovery — take it easy</div>`;
+  } else if(day.phase==='out'){
+    html += `<div class="banner rest">This date is before the plan start (5 Jul 2026).</div>`;
+  }
+
+  const checkable = day.tasks.filter(t=>t.checkbox);
+  let doneCount=0;
+  for(const t of checkable){ if(await getChecked(day.date+':'+t.id)) doneCount++; }
+  const pct = checkable.length ? Math.round(100*doneCount/checkable.length) : 0;
+  if(checkable.length){
+    html += `<div class="progress-wrap">
+      <div class="progress-track"><div class="progress-fill" style="width:${pct}%"></div></div>
+      <div class="progress-label">${doneCount}/${checkable.length} done · ${pct}%</div>
+    </div>`;
+  }
+
+  const dayIdx = Math.abs(diffDays(PLAN_START, dt)) % DAILY_LINES.length;
+  html += `<div class="quote-card fade-in"><div class="qtext">"${DAILY_LINES[dayIdx]}"</div></div>`;
+
+  if(day.phase==='study'){
+    html += `<button class="health-btn" onclick="toggleHealthDay('${day.date}')">${isHealthDay?'💗 Health Day is ON — tap to turn off':'💗 Not feeling well? Mark a Health Day'}</button>`;
+  }
+
+  const achieverIdx = Math.abs(diffDays(PLAN_START, dt)) % ACHIEVERS.length;
+  const ach = ACHIEVERS[achieverIdx];
+  html += `<div class="card fade-in"><h3>🌟 Woman Achiever Spotlight</h3>
+    <div class="achiever-card"><div class="a-name">${ach.name}</div><div class="a-fact">${ach.fact}</div></div>
+  </div>`;
+
+  if(day.tasks.length){
+    html += `<div class="section-title">Today's Schedule</div>`;
+    for(const t of day.tasks){
+      const checked = t.checkbox ? await getChecked(day.date+':'+t.id) : false;
+      html += `<div class="task ${checked?'done':''} ${t.plain?'plain':''}" id="task-${t.id}">
+        ${t.checkbox ? `<input type="checkbox" ${checked?'checked':''} onchange="toggleTask('${day.date}','${t.id}', this.checked, this)">` : `<div style="width:22px;text-align:center;color:var(--ink-soft);">–</div>`}
+        <div class="task-body">
+          <div class="task-time">${t.time}</div>
+          <div class="task-label">${t.label}</div>
+          ${t.note?`<div class="task-note">${t.note}</div>`:''}
+        </div>
+      </div>`;
+    }
+  }
+
+  html += `<div class="card fade-in"><h3>🔥 Strict Schedule Mode</h3>
+    <div class="streak-row">
+      <div class="streak-box"><div class="snum">${streak.current}</div><div class="slbl">Day Streak</div></div>
+      <div class="streak-box"><div class="snum">${streak.best}</div><div class="slbl">Best Streak</div></div>
+    </div>
+    <div class="strict-banner">${streak.message}</div>
+  </div>`;
+
+  if(revItems.length){
+    html += `<div class="card fade-in"><h3>🔁 Revision Reminders</h3>
+      <p style="font-size:11.5px;color:var(--ink-soft);margin:0 0 8px;">Spaced revision se hi cheezein pakki yaad rehti hain — 7, 14 aur 30 din pehle jo padha tha, aaj usse ek baar zaroor daekh lein.</p>
+      ${revItems.map(r=>`
+        <div class="rev-item">
+          <input type="checkbox" ${r.done?'checked':''} onchange="toggleRevision('${day.date}','${r.id}')">
+          <div class="rt"><div class="rev-tag">${r.gap} din pehle</div><div class="rt-topic">${r.text}</div></div>
+        </div>`).join('')}
+    </div>`;
+  }
+
+  html += `<div class="card fade-in"><h3>📝 Today's Review</h3>
+    <p style="font-size:11.5px;color:var(--ink-soft);margin:0 0 8px;">Din khatam hone se pehle aaj ka honest review karein — yeh strict schedule follow karne ki sabse badi key hai.</p>
+    <div class="rating-row">
+      ${[1,2,3,4,5].map(n=>`<button class="${review.rating===n?'sel':''}" onclick="setReview('${day.date}',{rating:${n}})">${'⭐'.repeat(n)}</button>`).join('')}
+    </div>
+    <div class="review-mood-row">
+      ${['😊','🙂','😐','😣','😴'].map(m=>`<button class="${review.mood===m?'sel':''}" style="font-size:20px;background:var(--cream);border:2px solid ${review.mood===m?'var(--blush-deep)':'transparent'};border-radius:10px;padding:5px 8px;cursor:pointer;" onclick="setReview('${day.date}',{mood:'${m}'})">${m}</button>`).join('')}
+    </div>
+    <textarea class="review-note" placeholder="Aaj kya achha gaya, kya improve karna hai? (optional)" onchange="setReview('${day.date}',{note:this.value})">${review.note||''}</textarea>
+  </div>`;
+
+  html += `<div class="card fade-in"><h3>Study Overview</h3>
+    <div class="overview-track"><h4>🟢 Coaching Track</h4>
+      ${OVERVIEW_COACH.map(o=>`<div class="ov-item"><span class="ov-name">${o.name}</span><span class="ov-dates">${o.dates}</span></div>`).join('')}
+    </div>
+    <div class="overview-track"><h4>🔵 Self-Study Track</h4>
+      ${OVERVIEW_SELF.map(o=>`<div class="ov-item"><span class="ov-name">${o.name}</span><span class="ov-dates">${o.dates}</span></div>`).join('')}
+    </div>
+    <div class="ov-item" style="background:var(--blush);margin-top:6px;"><span class="ov-name">🎯 Target — UPPSC Prelims</span><span class="ov-dates">6 December 2026</span></div>
+  </div>`;
+
+  html += `<div class="card"><h3>Tips</h3><ul class="tip-list">${TIPS.map(t=>`<li>${t}</li>`).join('')}</ul></div>`;
+
+  html += `<div class="card fade-in"><h3>🚀 How to Study Longer (High Productivity)</h3><ul class="tip-list">${STUDY_LONGER_TIPS.map(t=>`<li>${t}</li>`).join('')}</ul></div>`;
+
+  html += `<div class="card fade-in"><h3>📋 Backlog</h3>
+    <p style="font-size:11.5px;color:var(--ink-soft);margin:0 0 8px;">Jo topic ya kaam chhoot gaya ho, yahan daal dein — baad mein revise/complete karte waqt yahi list dekhein.</p>
+    ${backlogList.length ? backlogList.map(b=>`
+      <div class="backlog-item ${b.done?'done':''}">
+        <input type="checkbox" ${b.done?'checked':''} onchange="toggleBacklogItem('${b.id}')">
+        <span>${b.text}</span>
+        <button onclick="deleteBacklogItem('${b.id}')" title="Remove">✕</button>
+      </div>`).join('') : `<p style="font-size:12px;color:var(--ink-soft);">Backlog khaali hai — bahut badhiya! 🌸</p>`}
+    <div class="backlog-add">
+      <input id="backlogInput" type="text" placeholder="e.g. Revise Ancient History — Mauryan Empire" onkeydown="if(event.key==='Enter') addBacklogItem()">
+      <button onclick="addBacklogItem()">+ Add</button>
+    </div>
+  </div>`;
+
+  html += `<div class="card fade-in"><h3>✅ To-Do List</h3>
+    <p style="font-size:11.5px;color:var(--ink-soft);margin:0 0 8px;">Koi bhi chhota kaam, errand ya reminder — study se related ya personal, dono yahan daal sakti hain.</p>
+    ${todoList.length ? todoList.map(t=>`
+      <div class="todo-item ${t.done?'done':''}">
+        <input type="checkbox" ${t.done?'checked':''} onchange="toggleTodoItem('${t.id}')">
+        <span>${t.text}</span>
+        <button onclick="deleteTodoItem('${t.id}')" title="Remove">✕</button>
+      </div>`).join('') : `<p style="font-size:12px;color:var(--ink-soft);">To-Do list khaali hai 🌸</p>`}
+    <div class="todo-add">
+      <input id="todoInput" type="text" placeholder="e.g. Buy new notebook" onkeydown="if(event.key==='Enter') addTodoItem()">
+      <button onclick="addTodoItem()">+ Add</button>
+    </div>
+  </div>`;
+
+  html += `<div class="card fade-in"><h3>📊 Weekly AI Report</h3>
+    ${weeklyStats.map(s=>`
+      <div class="wk-row">
+        <span class="wk-day">${s.dow}</span>
+        <div class="wk-track">${s.isHealthDay ? '' : `<div class="wk-fill" style="width:${s.pct}%"></div>`}</div>
+        <span class="wk-pct">${s.isHealthDay ? '💗' : (s.hasData ? s.pct+'%' : '–')}</span>
+      </div>`).join('')}
+    <div class="wk-insight">🤖 ${weeklyInsight(weeklyStats)}</div>
+  </div>`;
+
+  html += `<div class="card"><details>
+    <summary>▸ A few notes about this plan</summary>
+    <ul class="tip-list">
+      <li>Both self-study blocks (1–3:30 PM and 4–6:30 PM) draw from the same subject but move to the next sub-topic each block, so a day covers two sub-topics.</li>
+      <li>Self-study Buffer/Revision was shortened from 48 to 35 days as asked — the freed 13 days were added back into Ancient, Medieval, Modern History, Science & Tech and UP Special proportionally.</li>
+      <li>UPPSC Paper-5 (History/Polity/Governance/Security of UP) and Paper-6 (Economy/Environment/Geography/Tech of UP) are both folded into the "UP Special" self-study window.</li>
+      <li>Ethics (Mains) has no detailed micro-syllabus from you yet, so standard Ethics/Aptitude topics are used from 10 Dec onward — tell me if you'd like this refined.</li>
+      <li>Sundays get a small breather — Self-Study Block 2 ends 20 min early and that time is added to the evening break; everything else repeats daily including Sundays.</li>
+      <li>Minimum 6 hours of study + coaching is built into every study day (3 hrs coaching + 5 hrs self-study, more if the active break is used well) — please don't skip below this.</li>
+    </ul>
+  </details></div>`;
+
+  html += `<div class="card"><h3>📲 Install as an App</h3>
+    <p style="font-size:12px;color:var(--ink-soft);margin:0 0 8px;">Is planner ko phone/laptop pe app ki tarah install kiya ja sakta hai — ek tap mein khulega, apna icon hoga.</p>
+    <button class="install-btn" id="installBtn" onclick="installApp()" style="display:none;">⬇ Install App</button>
+    <p id="installFallback" style="font-size:11.5px;color:var(--ink-soft);margin:8px 0 0;">Agar upar button nahi dikh raha: browser ke share/menu button → "Add to Home Screen" / "Install App" par tap karein.</p>
+  </div>`;
+
+  html += `<div class="card"><h3>☁️ Cloud Sync — Backup &amp; Restore</h3>
+    <p style="font-size:12px;color:var(--ink-soft);margin:0 0 8px;">Har tick auto-save hoti hai isi device par. Doosre phone/laptop par le jaane ke liye, ya safety ke liye kabhi bhi Export karke woh file apne Google Drive/email mein save kar lein — kabhi bhi Import karke sab wapas mil jayega.</p>
+    <div class="backup-row">
+      <button onclick="exportBackup()">⬇ Export Backup</button>
+      <button class="alt" onclick="document.getElementById('importArea').style.display='block'">⬆ Import Backup</button>
+    </div>
+    <div id="importArea" style="display:none;margin-top:8px;">
+      <textarea id="importText" placeholder="Paste exported backup JSON here"></textarea>
+      <div class="backup-row" style="margin-top:6px;"><button onclick="importBackup()">Restore</button></div>
+    </div>
+  </div>`;
+
+  html += `<div class="card fade-in"><h3>🎓 Ask Professor</h3>
+    <p style="font-size:11.5px;color:var(--ink-soft);margin:0 0 8px;">Schedule, subjects, revision, motivation — kuch bhi poochein. Yeh built-in guide 50+ common sawaalon ke jawab jaanta hai; jo na mile uska seedha WhatsApp link mil jayega.</p>
+    <div class="ask-input-row">
+      <input id="askInput" type="text" placeholder="e.g. Sunday ko kya schedule hai?" onkeydown="if(event.key==='Enter') askProfessor()">
+      <button onclick="askProfessor()">Ask</button>
+    </div>
+    <div>${ASK_CHIPS.map(c=>`<span class="ask-chip" onclick="document.getElementById('askInput').value='${c.replace(/'/g,"\\'")}';askProfessor()">${c}</span>`).join('')}</div>
+    <div id="askAnswerBox"></div>
+  </div>`;
+
+  html += `<div class="card" style="text-align:center;">
+    <h3>Need Help?</h3>
+    <p style="font-size:12px;color:var(--ink-soft);margin:0 0 10px;">Kabhi bhi koi help chahiye — schedule ho, app ho ya kuch aur — seedha Professor se WhatsApp par baat karein.</p>
+    <a class="wa-btn" href="https://wa.me/919335146032?text=${encodeURIComponent('Hi Professor, mujhe UPPSC planner mein help chahiye —')}" target="_blank" rel="noopener">💬 Message Professor on WhatsApp</a>
+  </div>`;
+
+  html += `<footer>Made with <span class="fbrand">care</span> by <span class="fbrand">Professor</span> · 5 Jul 2026 – Prelims 6 Dec 2026</footer>`;
+
+  app.innerHTML = html;
+}
+
+function renderMiniCalendar(dt){
+  const y=dt.getFullYear(), m=dt.getMonth();
+  const first=new Date(y,m,1); const startDow=first.getDay();
+  const daysInMonth=new Date(y,m+1,0).getDate();
+  let html = `<div style="font-family:'Cormorant Garamond',serif;font-size:15px;text-align:center;margin-bottom:6px;">${MON[m]} ${y}</div><div class="mini-cal">`;
+  ['S','M','T','W','T','F','S'].forEach(x=>html+=`<div class="dow-h">${x}</div>`);
+  for(let i=0;i<startDow;i++) html+=`<div class="cell blank"></div>`;
+  for(let day=1; day<=daysInMonth; day++){
+    const cur=new Date(y,m,day); const cs=ds(cur);
+    let cls='cell';
+    if(cs===ds(TODAY)) cls+=' today';
+    if(cs===ds(selectedDate)) cls+=' sel';
+    html += `<div class="${cls}" onclick="jumpTo('${cs}')">${day}</div>`;
+  }
+  html += `</div><input type="date" value="${ds(dt)}" onchange="jumpTo(this.value)">`;
+  return html;
+}
+
+function toggleCal(){ calOpen=!calOpen; render(); }
+function jumpTo(s){ selectedDate=d(s); calOpen=false; render(); }
+function navDay(n){ selectedDate=addDays(selectedDate,n); render(); }
+function goToday(){ selectedDate = TODAY<PLAN_START?PLAN_START:TODAY; render(); }
+
+async function toggleTask(dateStr, id, val){
+  await setChecked(dateStr+':'+id, val);
+  if(val){ celebrate(); }
+  render();
+}
+function celebrate(){
+  const c = CELEBRATE_LINES[Math.floor(Math.random()*CELEBRATE_LINES.length)];
+  const toast = document.getElementById('celebrate-toast');
+  toast.innerHTML = `<span class="cemoji">${c.e}</span> <span class="ctext">${c.t}</span>`;
+  toast.classList.add('show');
+  setTimeout(()=>toast.classList.remove('show'), 1600);
+}
+
+/* =========================================================
+   HEALTH DAY (mark today as a rest/unwell day — doesn't break streak)
+========================================================= */
+async function toggleHealthDay(dateStr){
+  const cur = (await storeGet('healthday:'+dateStr)) === '1';
+  await storeSet('healthday:'+dateStr, cur ? '0' : '1');
+  render();
+}
+
+/* =========================================================
+   BACKLOG
+========================================================= */
+async function loadBacklog(){
+  const raw = await storeGet('backlog:list');
+  try{ return raw ? JSON.parse(raw) : []; }catch(e){ return []; }
+}
+async function saveBacklogList(list){ await storeSet('backlog:list', JSON.stringify(list)); }
+async function addBacklogItem(){
+  const inp = document.getElementById('backlogInput');
+  if(!inp) return;
+  const text = inp.value.trim();
+  if(!text) return;
+  const list = await loadBacklog();
+  list.push({id:'b'+Date.now(), text, done:false});
+  await saveBacklogList(list);
+  render();
+}
+async function toggleBacklogItem(id){
+  const list = await loadBacklog();
+  const item = list.find(x=>x.id===id);
+  if(item) item.done = !item.done;
+  await saveBacklogList(list);
+  render();
+}
+async function deleteBacklogItem(id){
+  let list = await loadBacklog();
+  list = list.filter(x=>x.id!==id);
+  await saveBacklogList(list);
+  render();
+}
+
+/* =========================================================
+   TO-DO LIST (general tasks, separate from subject Backlog)
+========================================================= */
+async function loadTodo(){
+  const raw = await storeGet('todo:list');
+  try{ return raw ? JSON.parse(raw) : []; }catch(e){ return []; }
+}
+async function saveTodoList(list){ await storeSet('todo:list', JSON.stringify(list)); }
+async function addTodoItem(){
+  const inp = document.getElementById('todoInput');
+  if(!inp) return;
+  const text = inp.value.trim();
+  if(!text) return;
+  const list = await loadTodo();
+  list.push({id:'t'+Date.now(), text, done:false});
+  await saveTodoList(list);
+  render();
+}
+async function toggleTodoItem(id){
+  const list = await loadTodo();
+  const item = list.find(x=>x.id===id);
+  if(item) item.done = !item.done;
+  await saveTodoList(list);
+  render();
+}
+async function deleteTodoItem(id){
+  let list = await loadTodo();
+  list = list.filter(x=>x.id!==id);
+  await saveTodoList(list);
+  render();
+}
+
+/* =========================================================
+   STREAK / STRICT SCHEDULE MODE
+========================================================= */
+async function computeStreak(){
+  let current = 0;
+  for(let i=0;i<90;i++){
+    const target = addDays(TODAY, -i);
+    if(target < PLAN_START) break;
+    const day = buildDay(target);
+    const checkable = day.tasks.filter(t=>t.checkbox);
+    if(!checkable.length) break;
+    const isHD = (await storeGet('healthday:'+day.date)) === '1';
+    if(isHD){ continue; } // health days don't break the streak
+    let done=0;
+    for(const t of checkable){ if(await getChecked(day.date+':'+t.id)) done++; }
+    const pct = Math.round(100*done/checkable.length);
+    if(pct>=80){ current++; } else { break; }
+  }
+  const bestRaw = await storeGet('streak:best');
+  const best = Math.max(parseInt(bestRaw||'0',10), current);
+  await storeSet('streak:best', String(best));
+  let message;
+  if(current===0) message = "Aaj se strict mode shuru karein — 80%+ tasks poore karke apna streak banayein. Ek din bhi miss mat karein, consistency hi sabse badi taqat hai.";
+  else if(current<7) message = `${current} din ka streak — bahut badhiya! Isse todna mat, schedule se bilkul strict raho.`;
+  else message = `${current} din ka streak — outstanding discipline! Yehi consistency tumhe under-300 rank tak le jayegi. 🌸`;
+  return {current, best, message};
+}
+
+/* =========================================================
+   REVISION REMINDERS (7 / 14 / 30 day spaced revision)
+========================================================= */
+async function computeRevisionReminders(dt){
+  const gaps = [7,14,30];
+  const items = [];
+  for(const g of gaps){
+    const target = addDays(dt, -g);
+    if(target < PLAN_START) continue;
+    const day = buildDay(target);
+    if(day.phase!=='study') continue;
+    const parts = [];
+    if(day.coachTag) parts.push(day.coachTag);
+    if(day.selfTag) parts.push(day.selfTag);
+    if(!parts.length) continue;
+    const id = 'rev'+g;
+    const done = await getChecked(ds(dt)+':'+id);
+    items.push({id, gap:g, text:parts.join(' + '), done});
+  }
+  return items;
+}
+async function toggleRevision(dateStr, id){
+  const cur = await getChecked(dateStr+':'+id);
+  await setChecked(dateStr+':'+id, !cur);
+  render();
+}
+
+/* =========================================================
+   DAILY REVIEW (rating / mood / note)
+========================================================= */
+async function getReview(dateStr){
+  const raw = await storeGet('review:'+dateStr);
+  let r = {rating:0, mood:'', note:''};
+  try{ if(raw) r = Object.assign(r, JSON.parse(raw)); }catch(e){}
+  return r;
+}
+async function setReview(dateStr, patch){
+  const r = await getReview(dateStr);
+  Object.assign(r, patch);
+  await storeSet('review:'+dateStr, JSON.stringify(r));
+  render();
+}
+
+/* =========================================================
+   WEEKLY AI REPORT (locally computed, works fully offline)
+========================================================= */
+async function computeWeeklyStats(){
+  const stats = [];
+  for(let i=6;i>=0;i--){
+    const target = addDays(TODAY, -i);
+    const day = buildDay(target);
+    const checkable = day.tasks.filter(t=>t.checkbox);
+    let done = 0;
+    for(const t of checkable){ if(await getChecked(day.date+':'+t.id)) done++; }
+    const isHD = (await storeGet('healthday:'+day.date)) === '1';
+    const pct = checkable.length ? Math.round(100*done/checkable.length) : 0;
+    stats.push({date:day.date, dow:DOW[target.getDay()], pct, isHealthDay:isHD, hasData:checkable.length>0});
+  }
+  return stats;
+}
+function weeklyInsight(stats){
+  const usable = stats.filter(s=>s.hasData && !s.isHealthDay);
+  if(!usable.length) return "Is week ka data abhi available nahi hai — schedule shuru hote hi yahan insights dikhne lagenge.";
+  const avg = Math.round(usable.reduce((a,s)=>a+s.pct,0)/usable.length);
+  if(avg>=80) return `Excellent week! Average ${avg}% completion — is consistency ko exam tak banaye rakhein. 🌸`;
+  if(avg>=50) return `Good effort — average ${avg}% completion. Thoda aur consistency se yeh 80%+ ho sakta hai. 💪`;
+  return `Is week average ${avg}% raha — koi baat nahi, next week choti-choti wins par focus karein. Ek ek task pura karna hi kaafi hai. 🌷`;
+}
+
+async function exportBackup(){
+  try{
+    const prefixes = ['chk:','healthday:','backlog:','todo:','review:','streak:'];
+    let allKeys = [];
+    for(const p of prefixes){ allKeys = allKeys.concat(await storeListPrefix(p)); }
+    const out = {};
+    for(const k of allKeys){ try{ const v = await storeGet(k); if(v!==null) out[k]=v; }catch(e){} }
+    const blob = new Blob([JSON.stringify(out,null,2)], {type:'application/json'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a'); a.href=url; a.download='anuradha-uppsc-backup-'+ds(TODAY)+'.json';
+    document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
+  }catch(e){ alert('Export failed: '+e.message); }
+}
+async function importBackup(){
+  try{
+    const obj = JSON.parse(document.getElementById('importText').value);
+    for(const k in obj){ await storeSet(k, obj[k]); }
+    alert('Backup restored 🌸'); render();
+  }catch(e){ alert('Import failed — please check the pasted JSON.'); }
+}
+
+/* =========================================================
+   ASK PROFESSOR — built-in Q&A guide (no external API/server;
+   works fully offline on GitHub Pages). Matches the typed
+   question against keywords across many dimensions; if nothing
+   matches well, it points straight to WhatsApp.
+========================================================= */
+const ASK_CHIPS = ["Sunday ka schedule?", "7 din revision kya hai?", "Streak kaise banega?", "Health Day kya hai?", "Backup kaise le?"];
+
+const PROFESSOR_KB = [
+  {k:"sunday break relax evening extra", a:"Sunday ko Self-Study Block 2, 4:00–6:10 PM tak hota hai (20 min chhota) aur woh 20 min evening break mein jud jaate hain (6:10–9:00 PM) — baaki poora schedule same rehta hai."},
+  {k:"schedule time table daily routine kitne baje", a:"Roz ka structure: 6:30 uthna, 8–11 Coaching, 1–3:30 Self-Study 1, 3:30–4 Active Break, 4–6:30 Self-Study 2, 6:30–9 evening/dinner, 9–11:30 Coaching Revision, phir sleep. Har din ka exact topic 'Today's Schedule' card mein dikhta hai."},
+  {k:"sleep neend kitne ghante zaroori mandatory", a:"Sleep bilkul mandatory hai — roz 7-8 ghante (12:00–6:30 AM slot). Neend poori na ho to agle din focus, memory retention aur mood teeno kharab ho jaate hain — schedule chahe kitna bhi tight ho, isse skip mat karo."},
+  {k:"6 hours minimum study coaching mandatory", a:"Roz minimum 6 ghante study + coaching mandatory hai — coaching 3 ghante aur self-study 5 ghante milakar 8 ghante ban jaate hain, jo minimum se kaafi zyada hai. Active break bhi effectively study time hai."},
+  {k:"streak strict mode discipline", a:"Streak tab badhta hai jab kisi din ke 80%+ tasks complete ho jayein. Health Day mark karne se streak toota nahi, par kam completion se toot jaata hai — 'Strict Schedule Mode' card mein current aur best streak dikhta hai."},
+  {k:"health day sick beemar rest", a:"Agar tabiyat theek nahi hai, 'Mark a Health Day' button dabao — us din ke tasks optional ho jaate hain aur streak bhi nahi tootega. Apna khayal rakhna zaroori hai."},
+  {k:"revision 7 14 30 din spaced kab kya", a:"Revision Reminders card roz batata hai ki 7, 14 aur 30 din pehle kya padha tha — un topics ko us din revise karke checkbox tick kar dein. Spaced revision se cheezein pakki yaad rehti hain."},
+  {k:"backup export import cloud sync data safe", a:"Cloud Sync card se Export button se ek backup file download hoti hai — usse Google Drive ya email mein save kar lein. Doosre device par Import se sab data wapas aa jata hai. Auto-save toh har tick ke saath is device par ho hi jata hai."},
+  {k:"pin password login unlock", a:"App ek fixed PIN se unlock hoti hai jo Professor ne set kiya hai — koi 'forgot PIN' option jaan-bujhkar nahi rakha gaya, PIN Professor se hi milega."},
+  {k:"app install download home screen", a:"'Install as an App' card mein Install button dabao — agar wo nahi dikhta, browser ke menu se 'Add to Home Screen' / 'Install App' choose karein, phir yeh ek real app icon ki tarah khulega."},
+  {k:"backlog missed topic chhoot gaya", a:"Backlog card mein woh topics daalein jo kisi din chhoot gaye — baad mein fursat se unhe complete/revise karke tick kar dein."},
+  {k:"todo to-do list personal kaam", a:"To-Do List card general kaam/errands ke liye hai — study se related ho ya personal, dono daal sakti hain."},
+  {k:"mood emotion feel kaisa", a:"Din khatam hote waqt 'Today's Review' card mein mood aur rating daal dein — isse aapko apna pattern samajhne mein madad milegi."},
+  {k:"weekly report insight performance", a:"Weekly AI Report pichhle 7 dinon ka completion % track karta hai aur ek short insight deta hai — 80%+ average excellent maana jaata hai."},
+  {k:"geography subject kaise padhein strategy", a:"Geography ke liye Physical aur Human/Economic Geography dono cover karein, current affairs se link karke padhein — NCERT se base banayein, phir standard reference book se depth add karein."},
+  {k:"economy subject kaise padhein strategy", a:"Economy mein NITI Aayog, Budget, agriculture aur industrial policy jaise core areas hain — pehle concepts clear karein, phir current year ka Economic Survey/Budget se link karein."},
+  {k:"polity subject kaise padhein strategy", a:"Polity ke liye Constitution ka structure, amendments aur governance ka static base pehle solid karein — phir current affairs (naye bills, court judgments) se jodte rahein."},
+  {k:"ethics subject kaise padhein strategy", a:"Ethics (Mains) mein concepts ke saath case studies practice karna zaroori hai — daily ek case study solve karne ki habit banayein, 10 Dec se yeh schedule mein already hai."},
+  {k:"history ancient medieval modern kaise padhein", a:"History timeline-wise padhein — pehle chronology yaad karein, phir dynasties/movements ke key facts. NCERT Class 11-12 se shuru karke notes banayein."},
+  {k:"science technology kaise padhein", a:"Science & Tech mein roz-marra ke concepts simple bhasha mein samjhein, phir unhe current affairs (ISRO, naye discoveries) se link karke short notes banayein."},
+  {k:"up special uttar pradesh gk kaise padhein", a:"UP Special dono Paper-5 aur Paper-6 syllabus cover karta hai — pehle basic definitions, phir UP govt ki current schemes se link karke padhein. Yeh Prelims aur Mains dono ke liye important hai."},
+  {k:"buffer revision phase kya karna hai", a:"Buffer/Revision phase mein naye topics padhne ke bajaye purane notes aur PYQs revise karein, saath mein mock tests dekar apna Error Log banayein."},
+  {k:"mock test practice kab kaise", a:"Buffer/Revision window (5 Nov – 5 Dec) mein mock tests ka focus hai — har mock ke baad galtiyon ko Error Log mein note karein aur wahi dobara revise karein."},
+  {k:"current affairs kaise cover karein daily", a:"Ek running Current Affairs notebook rakhein, roz thoda-thoda note karein aur Sunday evening ko poori week ka revise kar lein."},
+  {k:"motivation demotivate mann nahi lag raha", a:"Aisa hona normal hai — chhote-chhote wins par focus karein, ek task pura karna hi kaafi hai. Daily quote card aur Woman Achiever Spotlight isi motivation ke liye hain. Zyada tough lage toh Professor se WhatsApp par baat karein."},
+  {k:"rank target under 300 goal", a:"Under-300 rank ka target consistency se aata hai — roz ka schedule follow karna, revision cycles miss na karna aur mock tests se seekhna, teeno milakar goal tak le jaate hain."},
+  {k:"bpsc uppsc prelims mains dates exam kab", a:"UPPSC Prelims 6 December 2026 ko hai. BPSC July 2026 mein aur UPPSC Prelims December 2026 mein hai — dono is planner ke coaching/self-study windows ke through cover ho rahe hain."},
+  {k:"exam day kya karna hai prelims", a:"Exam din sirf halka revision aur confidence rakhein — naya kuch mat padhein. Exam ke baad 3 din recovery/rest ka phase rakha gaya hai."},
+  {k:"post exam recovery rest kya karna", a:"Prelims ke baad 3 din halka rakha gaya hai — sirf light current affairs, baaki relax aur recovery. Poori mehnat ke baad body/mind ko rest zaroori hai."},
+  {k:"whatsapp contact professor message", a:"Neeche 'Need Help?' card mein WhatsApp button hai — kisi bhi doubt, issue ya schedule-related help ke liye seedha Professor ko message kar sakti hain."},
+  {k:"progress percent complete track", a:"Har din ke top par progress bar dikhta hai jo us din ke checkable tasks ka % completion batata hai — real-time update hota hai jaise-jaise tasks tick karte hain."},
+  {k:"note guidance subject kya padhna hai", a:"Har self-study block ke neeche ek chhoti guidance note hoti hai jo batati hai us subject mein kis tarah approach karna hai — beginner-friendly tips hain."},
+  {k:"calendar date jump navigate", a:"Navbar ke beech mein date par tap karke ek mini-calendar khulta hai — usse kisi bhi date par directly jump kar sakti hain, ya ‹ › se ek-ek din aage/peeche."},
+  {k:"today button kya karta hai", a:"'Today' button turant current date par le aata hai, chahe aap kitni bhi purani/aage ki date dekh rahi ho."},
+  {k:"data device save kahan store", a:"Sab data is device ke browser storage (localStorage) mein save hota hai — koi external server/API use nahi hoti, isliye poori tarah private aur offline-capable hai."},
+  {k:"skip din miss ho gaya kya karein", a:"Ek din miss ho jaye toh guilt mat karo — Backlog mein topic daal do, agle din se dobara strict follow karo. Health Day bhi ek valid option hai agar tabiyat kharab ho."},
+  {k:"study longer focus lamba kaise", a:"'How to Study Longer' card dekhein — Pomodoro technique, phone door rakhna, active recall aur movement breaks jaise practical tips wahan diye gaye hain."},
+  {k:"break kitni der lena chahiye", a:"Har 50-90 min padhai ke baad 5-10 min ka short break lein — lamba break lene se momentum toot jaata hai, isliye chhote aur timed breaks best hain."},
+  {k:"phone distraction social media kaise rokein", a:"Study block ke time phone dusre room mein rakhein ya Do Not Disturb laga dein — notifications hi sabse bada distraction hote hain."},
+  {k:"notes kaise banayein tips", a:"Subject-wise colour-coded notes banayein, current affairs ko alag notebook mein rakhein — isse revision phase bahut fast ho jaata hai."},
+  {k:"error log pyq mistake kya hai", a:"Jab bhi PYQ ya mock mein galti ho, use ek Error Log mein likh lein — Prelims se ek hafta pehle sirf yehi log revise karein, sabse high-yield activity hai."},
+  {k:"active break kya karna chahiye", a:"3:30–4:00 PM ke active break mein UP Special facts ya quick PYQs revise karein — yeh ek light lekin productive break hai, purely rest nahi."},
+  {k:"coaching class geography economics polity kab", a:"Coaching track: Geography (5 Jul–18 Aug), Economics (19 Aug–27 Sep), Polity (28 Sep–4 Nov), Buffer/Mocks (5 Nov–5 Dec), phir Ethics (Mains) 10 Dec se."},
+  {k:"self study track window kab kaunsa subject", a:"Self-study track: Ancient History, Medieval, Modern, Science & Tech, UP Special, phir Buffer/Revision aur aakhir mein Mains Foundation Revision — poori list 'Study Overview' card mein hai."},
+  {k:"mains foundation revision kya hai", a:"Prelims ke baad (10 Dec se) 'Mains Foundation Revision' phase shuru hota hai jisme purane self-study topics dobara rotate ho kar revise hote hain, Mains ki taiyari ke liye."},
+  {k:"water paani drink kitna", a:"Paani/hydration ka dhyaan rakhna zaroori hai — halka aur hydrated rehne se lambi study sessions aasan ho jaati hain, especially garmi mein."},
+  {k:"posture eye strain health tips padhte waqt", a:"Har ghante thoda break lekar aankhon ko 20 second door dekhein aur posture straight rakhein — lambi padhai mein yeh chhoti aadatein bahut fark daalti hain."},
+  {k:"anxiety stress pressure exam ko lekar", a:"Exam pressure feel karna normal hai — Daily Review mein apne feelings likhna madad karta hai. Agar zyada overwhelmed feel ho toh Professor se WhatsApp par baat zaroor karein."},
+  {k:"consistency kaise banaye rakhein", a:"Chhoti-chhoti daily wins par focus karein, streak dekhkar khud ko motivate karein, aur ek din miss hone par bhi agle din dobara shuru kar dein — yehi consistency ka raaz hai."},
+  {k:"time management kaise karein", a:"Fixed schedule follow karna hi best time management hai — har block ka ek clear goal likhein (STUDY_LONGER_TIPS card dekhein) taaki time waste na ho."},
+  {k:"which app features kya kya hai is planner mein", a:"Is planner mein: daily schedule, progress bar, streak tracker, revision reminders, daily review, backlog, to-do list, weekly AI report, cloud sync backup, aur Ask Professor — sab kuch is ek jagah available hai."}
+];
+
+function scoreMatch(query, entry){
+  const qWords = query.toLowerCase().split(/\s+/).filter(w=>w.length>2);
+  const kWords = entry.k.split(/\s+/);
+  let score = 0;
+  for(const w of qWords){ for(const k of kWords){ if(k.includes(w) || w.includes(k)) score++; } }
+  return score;
+}
+function askProfessor(){
+  const inp = document.getElementById('askInput');
+  const box = document.getElementById('askAnswerBox');
+  if(!inp || !box) return;
+  const q = inp.value.trim();
+  if(!q) return;
+  let best = null, bestScore = 0;
+  for(const entry of PROFESSOR_KB){
+    const s = scoreMatch(q, entry);
+    if(s>bestScore){ bestScore = s; best = entry; }
+  }
+  if(best && bestScore>=1){
+    box.innerHTML = `<div class="ask-answer"><div class="ask-q">Q: ${q}</div>${best.a}</div>`;
+  } else {
+    const waText = encodeURIComponent(`Hi Professor, mera sawaal hai: ${q}`);
+    box.innerHTML = `<div class="ask-answer"><div class="ask-q">Q: ${q}</div>Iska exact jawab abhi is guide mein nahi hai — Professor free hon toh seedha WhatsApp par pooch lein.<br><a class="wa-btn" style="margin-top:8px;" href="https://wa.me/919335146032?text=${waText}" target="_blank" rel="noopener">💬 Ask Professor on WhatsApp</a></div>`;
+  }
+}
+
+/* =========================================================
+   INSTALLABLE APP (PWA) — uses the real manifest.json and
+   sw.js files sitting next to this index.html on GitHub Pages.
+========================================================= */
+(function setupPWA(){
+  try{
+    if('serviceWorker' in navigator){
+      navigator.serviceWorker.register('sw.js').catch(()=>{});
+    }
+  }catch(e){}
+
+  window.deferredInstallPrompt = null;
+  window.addEventListener('beforeinstallprompt', (e)=>{
+    e.preventDefault();
+    window.deferredInstallPrompt = e;
+    const btn = document.getElementById('installBtn');
+    if(btn) btn.style.display = 'block';
+  });
+})();
+function installApp(){
+  if(window.deferredInstallPrompt){
+    window.deferredInstallPrompt.prompt();
+    window.deferredInstallPrompt = null;
+  }
+}
+
+initGate();
+</script>
+</body>
+</html>
